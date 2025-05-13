@@ -7,7 +7,7 @@ If you only want to re-run the simulations yourself, we provide a Docker image a
 1. Download our Docker image from https://drive.google.com/file/d/12LdcaW7fsZSH39hU8c-CCfhjWSOZ-3Ge/view?usp=sharing. This file is called "sparsevar-final.tar", and is quite large (~976MB). 
 2. Download and install Docker Desktop from https://www.docker.com/.
     - Docker Desktop has a user-friendly interface which can also be used to do the following steps, but here we provide precise commands you can use in your computer's Terminal/PowerShell.
-3. Start your Terminal/Powershell and navigate to the folder where you saved "sparsevar-test.tar".
+3. Start your Terminal/Powershell and navigate to the folder where you saved "sparsevar-final.tar".
     - On Windows, you can open PowerShell by opening the start menu (pressing the Windows key) and typing `powershell`. On Mac, use Command+Space to search for `terminal`.
     - Your starting working directory (on Windows) is probably "C:\Users\yourname". You can tell where you are by looking left of the ">" sign next to your flashing input line (it's "%" in the Mac Terminal).
     - If you're ever lost, the command `pwd` (print working directory) will also tell you where you are.
