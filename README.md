@@ -14,10 +14,10 @@ If you only want to re-run the simulations yourself, we provide a Docker image a
     - To navigate to a specific folder, use `cd path\to\folder` to set that as your working directory. For example, if the file is in your default Windows downloads folder, you can get there directly with `cd C:\Users\yourname\Downloads`.
     - If you want to quickly return to your home folder, type `cd ~`. "~" is shorthand for "C:\Users\yourname".
     - Insted of giving the full address of the folder (the absolute path) you can also give the relative path: If you're currently in "C:\Users\yourname", you can just type `cd Downloads`, because "Downloads" is a folder in your working directory.
-    - To see the contents of the current folder you're in, "ls" will list all the files and folders, along with some metadata. If you're in the right place, "sparsevar-test.tar" should be on the list.
+    - To see the contents of the current folder you're in, "ls" will list all the files and folders, along with some metadata. If you're in the right place, "sparsevar-final.tar" should be on the list.
 4. Load the Docker image with `docker load -i .\sparsevar-final.tar`. This could take a few minutes.
     - The "." is shorthand for your current working directory, the same way that "~" is shorthand for your home directory. 
-5. Check that the image loaded correctly: `docker images` should list all the images you have access to. "sparsevar-test" should be one of them.
+5. Check that the image loaded correctly: `docker images` should list all the images you have access to. "sparsevar-final" should be one of them.
 6. Create a container that runs the image: `docker run -v .:/home/output sparsevar-final`
     - The default command to create a container is `docker run image-name`; but the optional argument "-v .:/home/output" will copy the simulation results into your current working directory.
     - This method runs the entire simulation. If you want to run the simulation in smaller chunks, you can also add another optional arugment, e.g.: `docker run -e SCRIPT_NAME=dgp0_size.R -v .:/home/output sparsevar-final`. This runs only the "dgo0_size.R" script. There are 10 scripts in total, see the "Docker image setup" folder. Each takes approximately 36 hours to run.
