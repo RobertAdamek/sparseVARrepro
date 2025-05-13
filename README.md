@@ -3,8 +3,9 @@ This repository contains everything necessary to reproduce the simulation result
 If you only want to re-run the simulations yourself, we provide a Docker image and instructions how to run it. This method is reproducible regardless of future updates to R or its packages. For transparency, and to make the code useable for other purposes, we also provide the source code used to build the Docker image. 
 
 # How to run the simulations via Docker
-1. Download the Docker image from https://drive.google.com/file/d/12LdcaW7fsZSH39hU8c-CCfhjWSOZ-3Ge/view?usp=sharing. This file is called "sparsevar-final.tar", and is quite large (~976MB) 
-The code we provide here is only for transparency, and you do not need to run 
+*Disclaimer: the simulation can take a significant amount of time to run. We ran them on an Intel® Core™ i9-10900K processor for approximately 360 hours. It also requires at least 16GB of RAM.*
+1. Download the Docker image from https://drive.google.com/file/d/12LdcaW7fsZSH39hU8c-CCfhjWSOZ-3Ge/view?usp=sharing. This file is called "sparsevar-final.tar", and is quite large (~976MB). 
+2. 
 https://www.docker.com/
 
 # Contents
