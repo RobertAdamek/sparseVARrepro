@@ -21,7 +21,7 @@ If you only want to re-run the simulations yourself, we provide a Docker image a
 6. Create a container that runs the image: `docker run -v .:/home/output sparsevar-final`
     - The default command to create a container is `docker run image-name`; but the optional argument "-v .:/home/output" will copy the simulation results into your current working directory.
     - This method runs the entire simulation. If you want to run the simulation in smaller chunks, you can also add another optional arugment, e.g.: `docker run -e SCRIPT_NAME=dgp0_size.R -v .:/home/output sparsevar-final`. This runs only the "dgo0_size.R" script. There are 10 scripts in total, see the "Docker image setup" folder. Each takes approximately 36 hours to run.
-7. When complete, your folder should contain to .RData files, which contain the simulation results. To generate the plots, run the "plotting results.R" script in the "Results" folder.
+7. When complete, your folder should contain ten .RData files, which contain the simulation results. To generate the plots, run the "plotting results.R" script in the "Results" folder.
 
 # Contents
 - The simulation code uses function from the bespoke package "sparseVARboot". We provide the bundled package in the file "sparseVARboot_0.4.4.tar.gz", which can be installed directly, and also its source files in the sparseVARboot folder.
