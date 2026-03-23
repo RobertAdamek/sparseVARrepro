@@ -90,7 +90,7 @@ for(dgp in DGPs){
       D_melt<-melt.data.table(data=D, id.vars="T", value.name="rejection", variable.name = "Method")
       D_melt$T<-as.factor(D_melt$T)
       p[[count]]<-ggplot(data=D_melt, mapping=aes(x=T, y=rejection,  fill=Method))+#color=Method,
-        coord_cartesian(ylim = c(0, 0.5))+
+        coord_cartesian(ylim = c(0, 0.2))+
         #geom_line()+
         #geom_segment()+
         #geom_point()+
