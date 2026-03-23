@@ -1,4 +1,5 @@
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+library(this.path)
+setwd(this.path::here())
 library(ggplot2)
 library(ggpubr)
 library(data.table)
