@@ -1,3 +1,4 @@
+library(this.path)
 setwd(this.path::here())
 
 library(sparseVARboot)
@@ -10,9 +11,9 @@ years <- unique(data$year)
 real_gdp <- matrix(data$rgdpna, ncol = length(countries), 
                    dimnames = list(year = years, countries = countries))
 
-library(bootUR)
+#library(bootUR)
 
-bootUR::plot_missing_values(real_gdp)
+#bootUR::plot_missing_values(real_gdp)
 
 real_gdp_clean <- real_gdp[-(1:20), ]
 nT <- nrow(real_gdp_clean)
@@ -89,6 +90,3 @@ ggplot(pvalsub,
         legend.key = element_blank())
 
 ggsave("pval_gdp.pdf", width = 8, height = 4)
-ggsave("../../Presentations/Figures/pval_gdp.pdf", width = 8, height = 4)
-
-r
