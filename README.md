@@ -1,5 +1,5 @@
 # sparseVARrepro
-This repository contains everything necessary to reproduce the simulation results of the paper "Sparse high-dimensional vector autoregressive bootstrap" by Robert Adamek, Stephan Smeekes, and Ines Wilms. 
+This repository contains everything necessary to reproduce the simulation and empirical application results of the paper "Sparse high-dimensional vector autoregressive bootstrap" by Robert Adamek, Stephan Smeekes, and Ines Wilms. 
 If you only want to re-run the simulations yourself, we provide a Docker image and instructions how to run it. This method is reproducible regardless of future updates to R or its packages. For transparency, and to make the code useable for other purposes, we also provide the source code used to build the Docker image. 
 
 # How to run the simulations via Docker
