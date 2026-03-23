@@ -143,7 +143,8 @@ simulate_boot_all_methods <- function(pars, boot, B, level, p = 0, l = 0, parall
   return(list(reject = reject, tuning = tuning
               ###################remove
               , coef_pre=coef_pre, coef_post=coef_post,
-              lambda=lambdas, lambdas=lambdass, boot_quantiles=out$boot_quantiles, statistic=out$mean, smeans=out$smeans
+              lambda=lambdas, lambdas=lambdass, boot_quantiles=out$boot_quantiles, statistic=out$mean, smeans=out$smeans,
+              x=x
               ###########################
               ))
 }
