@@ -34,7 +34,8 @@ load("PWT_gdpgrowth.RData")
 
 source("StepM.R")
 names_units <- country_key[, 1]
-boot_vec <- c("VAR-MB", "VAR-EB", "BWB", "MBB", "MB", "EB")
+boot_vec <- c("VAR-TF", #"VAR-EB", 
+              "BWB", "MBB", "MB", "EB")
 
 set.seed(13682)
 test_mu1 <- StepM(x = gdp_growth, names_units = names_units, mu0 = 1, boot = boot_vec)
@@ -56,7 +57,8 @@ library(ggplot2)
 
 pvalsub <- pval2[pval2$Country %in% pval2$Country[1:20], ]
 
-palette <- c("#097e50", "#66a61e", "#a54043", "#e5694a", "#464b92", "#698fb2")
+#palette <- c("#097e50", "#66a61e", "#a54043", "#e5694a", "#464b92", "#698fb2")
+palette <- c("#395289","#5dc661","#fbe723", "#f9775d", "#b83779")
 
 ggplot(pvalsub, 
        aes(x = Country, y = Pvalue, fill = Bootstrap)) +
