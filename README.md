@@ -4,7 +4,7 @@ If you only want to re-run the simulations yourself, we provide a Docker image a
 
 # How to run the simulations via Docker
 *Warning: the simulations can take a significant amount of time to run. We ran them on an Intel® Core™ i9-10900K processor for approximately 360 hours. It also requires at least 16GB of RAM.*
-1. Download our Docker image from https://drive.google.com/file/d/1vwAmIPa8po6CfM5diTA2jZwv5R_ZNlTe/view?usp=sharing. This file is called "sparsevar-final.tar", and is quite large (~965MB). 
+1. Download our Docker image from https://drive.google.com/file/d/1dTdMzR5sf-zJgPyquiGKFTf1NsarA8ic/view?usp=sharing. This file is called "sparsevar-final.tar", and is quite large (~988MB). 
 2. Download and install Docker Desktop from https://www.docker.com/.
     - Docker Desktop has a user-friendly interface which can also be used to do the following steps, but here we provide precise commands you can use in your computer's Terminal/PowerShell.
 3. Start your Terminal/Powershell and navigate to the folder where you saved "sparsevar-final.tar".
