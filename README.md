@@ -24,7 +24,7 @@ If you only want to re-run the simulations yourself, we provide a Docker image a
 7. When complete, your folder should contain ten .RData files, which contain the simulation results. To generate the plots, run the "plotting results.R" script in the "Results" folder.
 
 # Contents
-- The simulation and empirical application code uses function from the bespoke package "sparseVARboot". We provide the bundled package in the file "sparseVARboot_0.4.5.tar.gz", which can be installed directly, and also its source files in the sparseVARboot folder.
+- The simulation and empirical application code uses function from the bespoke package "sparseVARboot". We provide the bundled package in the file "sparseVARboot_0.4.6.tar.gz", which can be installed directly, and also its source files in the sparseVARboot folder.
 
 - The folder "Docker image setup" contains all the files used to build the Docker image, including 10 individual scripts that can also be run directly (with minor alterations).
 
