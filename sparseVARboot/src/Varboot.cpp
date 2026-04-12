@@ -151,7 +151,7 @@ void VAR_root_bound_new(VAR_out& V, const double& max_EV = 0.999) {
   const double M = max_EV / A_EV(0);
   if (M < 1) {
     for (int i = 0; i < p; i++) {
-      V.coef.cols(i * k, (i + 1) * k - 1) *= pow(M, i + 1);
+      V.coef.rows(i * k, (i + 1) * k - 1) *= pow(M, i + 1);
     }
   }
 }
@@ -812,7 +812,7 @@ boot_out boot_means_SD(const arma::mat& x_with_means, const arma::mat oracle_A,
     ////////////////////remove
     out_boot.coef_pre=out.coef;
     //////////////////////
-    
+   
     VAR_root_bound_new(out);
     
     ////////////////////remove
@@ -945,7 +945,7 @@ boot_out boot_means_clean(const arma::mat& x, const double& mu0, const int& boot
     ////////////////////remove
     out_boot.coef_pre = out.coef;
     //////////////////////
-    
+   
     VAR_root_bound_new(out);
     
     ////////////////////remove

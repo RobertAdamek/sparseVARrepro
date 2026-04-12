@@ -1120,6 +1120,7 @@ VAR_select_out selectIC(const arma::mat Y, const arma::mat VAR_lags, const int& 
   lambda_opt = lambda_grid[lambda_opt_index];
   
   VAR_select_out out;
+
   out.coef = coef.t();
   out.resid = resids.slice(lambda_opt_index);
   out.lambda = lambda_opt;
