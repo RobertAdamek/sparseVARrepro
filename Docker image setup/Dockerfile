@@ -9,7 +9,7 @@ RUN R -e "options(repos= list(CRAN = 'https://packagemanager.posit.co/cran/2025-
 # package related files
 COPY DGP.R /home/DGP.R
 COPY Simulation.R /home/Simulation.R
-COPY sparseVARboot_0.4.5.tar.gz /home/sparseVARboot_0.4.5.tar.gz
+COPY sparseVARboot_0.4.6.tar.gz /home/sparseVARboot_0.4.5.tar.gz
 
 RUN R -e "install.packages('/home/sparseVARboot_0.4.5.tar.gz', repos = NULL, type = 'source')" 
 
