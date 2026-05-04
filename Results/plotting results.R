@@ -98,13 +98,13 @@ for(dgp in DGPs){
         #scale_x_continuous(breaks=Ts)+
         geom_hline(yintercept = 0.05, color="black")+
         #scale_color_manual(values=c("VAR-BIC"="blue", "VAR-TF"="violet", "VAR-TF-0.4"="red","VAR-TF-0.8"="purple","MBB"="green", "BWB"="darkgreen", "VAR-oracle"="darkorange"))+
-        scale_fill_manual(values=c("VAR-BIC"=rgb(red=68, green=1, blue=83, alpha=255, maxColorValue = 255), 
-                                   "VAR-TF"=rgb(red=58, green=82, blue=138, alpha=255, maxColorValue = 255), 
-                                   "VAR-oracle"=rgb(red=32, green=144, blue=139, alpha=255, maxColorValue = 255), 
+        scale_fill_manual(values=c("VAR-BIC"=rgb(red=252, green=231, blue=36, alpha=255, maxColorValue = 255), 
+                                   "VAR-TF"="#097e50", 
+                                   "VAR-oracle"="darkgray", 
                                    "VAR-TF-0.4"="red",
                                    "VAR-TF-0.8"="pink",
-                                   "BWB"=rgb(red=93, green=199, blue=98, alpha=255, maxColorValue = 255), 
-                                   "MBB"=rgb(red=252, green=231, blue=36, alpha=255, maxColorValue = 255)))+
+                                   "BWB"="#a54043", 
+                                   "MBB"="#e5694a"))+
         ggtitle(paste0("N=",Ns[ns]))
     }
     # combine horizontally
@@ -160,13 +160,13 @@ for(dgp in DGPs){
     p[[count]]<-ggplot(data=D_melt, mapping=aes(x=T, y=rejection,  fill=Method))+
       coord_cartesian(ylim = c(0, 1))+
       geom_col(position="dodge")+
-      scale_fill_manual(values=c("VAR-BIC"=rgb(red=68, green=1, blue=83, alpha=255, maxColorValue = 255), 
-                                 "VAR-TF"=rgb(red=58, green=82, blue=138, alpha=255, maxColorValue = 255), 
-                                 "VAR-oracle"=rgb(red=32, green=144, blue=139, alpha=255, maxColorValue = 255), 
+      scale_fill_manual(values=c("VAR-BIC"=rgb(red=252, green=231, blue=36, alpha=255, maxColorValue = 255), 
+                                 "VAR-TF"="#097e50", 
+                                 "VAR-oracle"="darkgray", 
                                  "VAR-TF-0.4"="red",
                                  "VAR-TF-0.8"="pink",
-                                 "BWB"=rgb(red=93, green=199, blue=98, alpha=255, maxColorValue = 255), 
-                                 "MBB"=rgb(red=252, green=231, blue=36, alpha=255, maxColorValue = 255)))+
+                                 "BWB"="#a54043", 
+                                 "MBB"="#e5694a"))+
       ggtitle(paste0("N=",Ns[ns]))+
       guides(color = guide_legend(override.aes = list(shape = NA ) ) )+ 
       theme(legend.position="bottom")
