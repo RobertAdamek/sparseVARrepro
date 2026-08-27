@@ -1031,7 +1031,7 @@ VAR_select_out selectTF(const arma::vec lambda_grid, const arma::mat Y, const ar
   // alpha: alpha quantile of the Gaussian maximum to be considered. Overwritten in this method.
   
   
-  const unsigned int& N = VAR_lags.n_cols; // N is number of predictor variables (pxd in VAR)
+//  const unsigned int& N = VAR_lags.n_cols; // N is number of predictor variables (pxd in VAR)
   const unsigned int& T_ = VAR_lags.n_rows; // number of time points
   // set up the lambda that is always used
   const double gamma_n = 0.1 / log(double(max(int(T_), p*k)));

@@ -25,8 +25,16 @@ sim_VAR_cpp_both <- function(T, ar, Sigma, burn) {
     .Call(`_sparseVARboot_sim_VAR_cpp_both`, T, ar, Sigma, burn)
 }
 
-boot_means_R <- function(x, oracle_A, oracle_u, boot = 1L, p = 1L, l = 1L, abs_val = TRUE, q = 0.95 * ones(1), B = 9999L, show_progress = FALSE, penalization = 1L, nbr_lambdas = 10, lambda_ratio = 100, selection = 1L, eps = 0.001, pen_own = TRUE, only_lag1 = FALSE, c = 0.8, K = 15L, improvement_thresh = 0.01, Nsim = 1000L, alpha = 0.05) {
+boot_means_R <- function(x, oracle_A, oracle_u, boot = 1L, p = 1L, l = 1, abs_val = TRUE, q = 0.95 * ones(1), B = 9999L, show_progress = FALSE, penalization = 1L, nbr_lambdas = 10, lambda_ratio = 100, selection = 1L, eps = 0.001, pen_own = TRUE, only_lag1 = FALSE, c = 0.8, K = 15L, improvement_thresh = 0.01, Nsim = 1000L, alpha = 0.05) {
     .Call(`_sparseVARboot_boot_means_R`, x, oracle_A, oracle_u, boot, p, l, abs_val, q, B, show_progress, penalization, nbr_lambdas, lambda_ratio, selection, eps, pen_own, only_lag1, c, K, improvement_thresh, Nsim, alpha)
+}
+
+boot_means_SD_R <- function(x, oracle_A, oracle_u, boot = 1L, p = 1L, l = 1, abs_val = TRUE, q = 0.95 * ones(1), B = 9999L, show_progress = FALSE, penalization = 1L, nbr_lambdas = 10, lambda_ratio = 100, selection = 1L, eps = 0.001, pen_own = TRUE, only_lag1 = FALSE, c = 0.8, K = 15L, improvement_thresh = 0.01, Nsim = 1000L, alpha = 0.05) {
+    .Call(`_sparseVARboot_boot_means_SD_R`, x, oracle_A, oracle_u, boot, p, l, abs_val, q, B, show_progress, penalization, nbr_lambdas, lambda_ratio, selection, eps, pen_own, only_lag1, c, K, improvement_thresh, Nsim, alpha)
+}
+
+boot_means_clean_R <- function(x, mu0 = 0, boot = 1L, p = 1L, l = 1, abs_val = TRUE, standardize = FALSE, q = 0.95 * ones(1), B = 9999L, show_progress = FALSE, penalization = 1L, nbr_lambdas = 10, lambda_ratio = 100, selection = 1L, eps = 0.001, pen_own = TRUE, only_lag1 = FALSE, c = 0.8, K = 15L, improvement_thresh = 0.01, Nsim = 1000L, alpha = 0.05) {
+    .Call(`_sparseVARboot_boot_means_clean_R`, x, mu0, boot, p, l, abs_val, standardize, q, B, show_progress, penalization, nbr_lambdas, lambda_ratio, selection, eps, pen_own, only_lag1, c, K, improvement_thresh, Nsim, alpha)
 }
 
 VAR_R <- function(y, p, intercept = TRUE) {

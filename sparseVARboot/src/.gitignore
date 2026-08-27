@@ -1,0 +1,4 @@
+RcppExports.o
+Varboot.o
+sparseVAR.o
+sparseVARboot.so

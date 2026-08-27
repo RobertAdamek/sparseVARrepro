@@ -327,9 +327,40 @@ arma::mat MBB(const arma::mat& x, const arma::uvec& i, const int& l){
 arma::mat BWB(const arma::mat& x, const arma::vec& z, const int& l){
   const int T = x.n_rows;
   const int N = x.n_cols;
-  const arma::mat xi_rep = repelem(z, l, N);
+  const arma::mat xi_rep = repelem(z, l, 2*N);
   const arma::mat x_star = x % xi_rep.head_rows(T);
   return x_star;
+}
+
+arma::mat DWB(const arma::mat& x, const arma::vec& z, const arma::sp_mat& s){
+  const int T = x.n_rows;
+  const int N = x.n_cols;
+  const arma::mat xi = s * z.head_rows(T);
+  const arma::mat xi_rep = repelem(xi, 1, N);
+  const arma::mat x_star = x % xi_rep;
+  return x_star;
+}
+
+// Implement the Bartlett kernel as in Kurisu et al. 
+// This is easiest to program and most efficient. And it matches naturally with the MBB. 
+double DWB_kernel(const double& x) {
+  const double k = 1 - abs(x);
+  return k;
+}
+
+arma::sp_mat DWB_matrix(const unsigned int& T, const double& l){
+  arma::mat a = zeros(T, T);
+  double lb, x;
+  for (unsigned int i = 0; i < T; i++) {
+    lb = std::max(i - l, 0.0);
+    for (unsigned int j = floor(lb); j <= i; j++) {
+      x = (i - j) / l;
+      a(i, j) = DWB_kernel(x);
+    }
+  }
+  a = symmatl(a);
+  const arma::sp_mat Sigma_sqrt = sp_mat(chol(a, "lower"));
+  return(Sigma_sqrt);
 }
 
 struct boot_sample_VAR_SB : public RcppParallel::Worker
@@ -467,6 +498,40 @@ struct boot_sample_BWB : public RcppParallel::Worker
   void operator()(std::size_t begin, std::size_t end) {
     for (std::size_t iB = begin; iB < end; iB++) {
       x_boot.slice(iB) = BWB(x, z.col(iB), l);
+      means_boot.slice(iB) = sorted_means(x_boot.slice(iB), abs_val);
+      prog.increment();
+    }
+  }
+};
+
+struct boot_sample_DWB : public RcppParallel::Worker
+{
+  // inputs
+  const arma::mat& x;
+  const arma::mat& z;
+  const arma::sp_mat& s;
+  const arma::mat& smeans;
+  const bool& abs_val;
+  
+  const unsigned int N = x.n_cols;
+  const unsigned int B = z.n_cols;
+  
+  // Output
+  arma::cube& means_boot;
+  arma::cube& x_boot;
+  progress& prog;
+  
+  // initialize with source and destination
+  boot_sample_DWB(const arma::mat& x, const arma::mat& z,
+                  const arma::sp_mat& s, const arma::mat& smeans, const bool& abs_val,
+                  arma::cube& means_boot, arma::cube& x_boot, progress& prog)
+    : x(x), z(z), s(s), smeans(smeans), abs_val(abs_val),
+      means_boot(means_boot), x_boot(x_boot), prog(prog) {}
+  
+  // Bootstrap
+  void operator()(std::size_t begin, std::size_t end) {
+    for (std::size_t iB = begin; iB < end; iB++) {
+      x_boot.slice(iB) = DWB(x, z.col(iB), s);
       means_boot.slice(iB) = sorted_means(x_boot.slice(iB), abs_val);
       prog.increment();
     }
@@ -616,7 +681,43 @@ struct boot_sample_BWB2 : public RcppParallel::Worker
   }
 };
 
-boot_out boot_means(const arma::mat& x_with_means, const arma::mat oracle_A, const arma::mat oracle_u, const int& boot, const int& p, const int& l, 
+struct boot_sample_DWB2 : public RcppParallel::Worker
+{
+  // inputs
+  const arma::mat& x;
+  const arma::mat& z;
+  const arma::sp_mat& s;
+  const arma::mat& smeans;
+  const bool& abs_val;
+  const bool& standardize;
+  const unsigned int N = x.n_cols;
+  const unsigned int B = z.n_cols;
+  
+  // Output
+  arma::cube& means_boot;
+  arma::cube& x_boot;
+  progress& prog;
+  
+  // initialize with source and destination
+  boot_sample_DWB2(const arma::mat& x, const arma::mat& z,
+                  const arma::sp_mat& s, const arma::mat& smeans, const bool& abs_val,
+                  const bool& standardize, 
+                  arma::cube& means_boot, arma::cube& x_boot, progress& prog)
+    : x(x), z(z), s(s), smeans(smeans), abs_val(abs_val), standardize(standardize),
+      means_boot(means_boot), x_boot(x_boot), prog(prog) {}
+  
+  // Bootstrap
+  void operator()(std::size_t begin, std::size_t end) {
+    for (std::size_t iB = begin; iB < end; iB++) {
+      x_boot.slice(iB) = DWB(x, z.col(iB), s);
+      means_boot.slice(iB) = sorted_stats(x_boot.slice(iB), abs_val, standardize);
+      prog.increment();
+    }
+  }
+};
+
+boot_out boot_means(const arma::mat& x_with_means, const arma::mat oracle_A, const arma::mat oracle_u, const int& boot, 
+                    const int& p, const double& l, 
                     const bool& abs_val, const arma::vec& q, const int& B, const arma::mat init, 
                     const bool& show_progress, const int& penalization, 
                     const double& nbr_lambdas, const double& lambda_ratio, 
@@ -648,6 +749,7 @@ boot_out boot_means(const arma::mat& x_with_means, const arma::mat oracle_A, con
   
   VAR_out out;
   int p_boot, l_boot, nb;
+  double l_unrounded;
   boot_out out_boot;
   
   if (boot == 1 | boot == 2){
@@ -680,13 +782,14 @@ boot_out boot_means(const arma::mat& x_with_means, const arma::mat oracle_A, con
     out_boot.coef_post=out.coef;
     //////////////////////
   } else {
-    if (l == 0) {
-      l_boot = round(determine_block_length(x));
+    if (l == 0.0) {
+      l_unrounded = determine_block_length(x);
     } else {
-      l_boot = l;
+      l_unrounded = l;
     }
-    l_boot = std::max(1, std::min(l_boot, T/2));
-    out_boot.par = l_boot;
+    l_unrounded = std::max(1.0, std::min(l_unrounded, double(T)/2.0));
+    l_boot = round(l);
+    out_boot.par = l_unrounded;
   }
   
   arma::cube means_boot(N, 2, B);
@@ -719,6 +822,11 @@ boot_out boot_means(const arma::mat& x_with_means, const arma::mat oracle_A, con
     const arma::umat i = custom_sample(nb, B, T - l_boot + 1);
     boot_sample_MBB boot_sample_x(x, i, l_boot, smeans, abs_val, means_boot, x_boot, prog);
     RcppParallel::parallelFor(0, B, boot_sample_x);
+  } else if (boot == 5){
+    const arma::sp_mat s = DWB_matrix(T, l_unrounded);
+    const arma::mat z = custom_rnorm(T, B, 0, 1);
+    boot_sample_DWB boot_sample_x(x, z, s, smeans, abs_val, means_boot, x_boot, prog);
+    RcppParallel::parallelFor(0, B, boot_sample_x);
   }
   
   arma::vec max_means_q(2);
@@ -731,8 +839,9 @@ boot_out boot_means(const arma::mat& x_with_means, const arma::mat oracle_A, con
 }
 
 // [[Rcpp::export]]
-Rcpp::List boot_means_R(const arma::mat& x, const arma::mat oracle_A, const arma::mat oracle_u, const int& boot = 1, const int& p = 1, 
-                        const int& l = 1, const bool& abs_val = true, 
+Rcpp::List boot_means_R(const arma::mat& x, const arma::mat oracle_A, const arma::mat oracle_u, const int& boot = 1, 
+                        const int& p = 1, 
+                        const double& l = 1, const bool& abs_val = true, 
                         const arma::vec& q = 0.95 * ones(1), const int& B = 9999, 
                         const bool& show_progress = false, const int& penalization = 1, 
                         const double& nbr_lambdas = 10, const double& lambda_ratio = 100,
@@ -757,7 +866,7 @@ Rcpp::List boot_means_R(const arma::mat& x, const arma::mat oracle_A, const arma
 }
 
 boot_out boot_means_SD(const arma::mat& x_with_means, const arma::mat oracle_A, 
-                       const arma::mat oracle_u, const int& boot, const int& p, const int& l, 
+                       const arma::mat oracle_u, const int& boot, const int& p, const double& l, 
                        const bool& abs_val, const arma::vec& q, const int& B, const arma::mat init, 
                        const bool& show_progress, const int& penalization, 
                        const double& nbr_lambdas, const double& lambda_ratio, 
@@ -788,6 +897,7 @@ boot_out boot_means_SD(const arma::mat& x_with_means, const arma::mat oracle_A,
   
   VAR_out out;
   int p_boot, l_boot, nb;
+  double l_unrounded;
   boot_out out_boot;
   
   if (boot == 1 | boot == 2){
@@ -819,13 +929,14 @@ boot_out boot_means_SD(const arma::mat& x_with_means, const arma::mat oracle_A,
     out_boot.coef_post=out.coef;
     //////////////////////
   } else {
-    if (l == 0) {
-      l_boot = round(determine_block_length(x));
+    if (l == 0.0) {
+      l_unrounded = determine_block_length(x);
     } else {
-      l_boot = l;
+      l_unrounded = l;
     }
-    l_boot = std::max(1, std::min(l_boot, T/2));
-    out_boot.par = l_boot;
+    l_unrounded = std::max(1.0, std::min(l_unrounded, double(T)/2.0));
+    l_boot = round(l);
+    out_boot.par = l_unrounded;
   }
   
   arma::cube means_boot(N, 2, B);
@@ -858,6 +969,11 @@ boot_out boot_means_SD(const arma::mat& x_with_means, const arma::mat oracle_A,
     const arma::umat i = custom_sample(nb, B, T - l_boot + 1);
     boot_sample_MBB boot_sample_x(x, i, l_boot, smeans, abs_val, means_boot, x_boot, prog);
     RcppParallel::parallelFor(0, B, boot_sample_x);
+  } else if (boot == 5){
+    const arma::sp_mat s = DWB_matrix(T, l_unrounded);
+    const arma::mat z = custom_rnorm(T, B, 0, 1);
+    boot_sample_DWB boot_sample_x(x, z, s, smeans, abs_val, means_boot, x_boot, prog);
+    RcppParallel::parallelFor(0, B, boot_sample_x);
   }
   
   arma::vec max_means_q(2);
@@ -872,7 +988,7 @@ boot_out boot_means_SD(const arma::mat& x_with_means, const arma::mat oracle_A,
 
 // [[Rcpp::export]]
 Rcpp::List boot_means_SD_R(const arma::mat& x, const arma::mat oracle_A, const arma::mat oracle_u, const int& boot = 1, const int& p = 1, 
-                           const int& l = 1, const bool& abs_val = true, 
+                           const double& l = 1, const bool& abs_val = true, 
                            const arma::vec& q = 0.95 * ones(1), const int& B = 9999, 
                            const bool& show_progress = false, const int& penalization = 1, 
                            const double& nbr_lambdas = 10, const double& lambda_ratio = 100,
@@ -922,6 +1038,7 @@ boot_out boot_means_clean(const arma::mat& x, const double& mu0, const int& boot
  
   VAR_out out;
   int p_boot, l_boot, nb;
+  double l_unrounded;
   boot_out out_boot;
   
   if (boot == 1 | boot == 2){
@@ -952,13 +1069,14 @@ boot_out boot_means_clean(const arma::mat& x, const double& mu0, const int& boot
     out_boot.coef_post = out.coef;
     //////////////////////
   } else {
-    if (l == 0) {
-      l_boot = round(determine_block_length(xd));
+    if (l == 0.0) {
+      l_unrounded = determine_block_length(x);
     } else {
-      l_boot = l;
+      l_unrounded = l;
     }
-    l_boot = std::max(1, std::min(l_boot, T/2));
-    out_boot.par = l_boot;
+   l_unrounded = std::max(1.0, std::min(l_unrounded, double(T)/2.0));
+    l_boot = round(l);
+    out_boot.par = l_unrounded;
   }
   
   arma::cube means_boot(N, 2, B);
@@ -993,6 +1111,12 @@ boot_out boot_means_clean(const arma::mat& x, const double& mu0, const int& boot
     boot_sample_MBB2 boot_sample_x(xd, i, l_boot, smeans, abs_val, standardize, means_boot, 
                                    x_boot, prog);
     RcppParallel::parallelFor(0, B, boot_sample_x);
+  } else if (boot == 5){
+    const arma::sp_mat s = DWB_matrix(T, l_unrounded);
+    const arma::mat z = custom_rnorm(T, B, 0, 1);
+    boot_sample_DWB2 boot_sample_x(x, z, s, smeans, abs_val, standardize, means_boot,
+                                  x_boot, prog);
+    RcppParallel::parallelFor(0, B, boot_sample_x);
   }
   
   arma::vec max_boot_means = means_boot.subcube(0, 0, 0, 0, 0, B - 1); //step 9 in the bootstrap algorithm
@@ -1007,7 +1131,7 @@ boot_out boot_means_clean(const arma::mat& x, const double& mu0, const int& boot
 // [[Rcpp::export]]
 Rcpp::List boot_means_clean_R(const arma::mat& x, const double& mu0 = 0,
                               const int& boot = 1, const int& p = 1, 
-                           const int& l = 1, const bool& abs_val = true, 
+                           const double& l = 1, const bool& abs_val = true, 
                            const bool& standardize = false,
                            const arma::vec& q = 0.95 * ones(1), const int& B = 9999, 
                            const bool& show_progress = false, const int& penalization = 1, 
