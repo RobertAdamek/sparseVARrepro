@@ -12,30 +12,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// VAR_determine_p
-int VAR_determine_p(const arma::mat& x, const int& pmax, const int& criterion);
-RcppExport SEXP _sparseVARboot_VAR_determine_p(SEXP xSEXP, SEXP pmaxSEXP, SEXP criterionSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const int& >::type pmax(pmaxSEXP);
-    Rcpp::traits::input_parameter< const int& >::type criterion(criterionSEXP);
-    rcpp_result_gen = Rcpp::wrap(VAR_determine_p(x, pmax, criterion));
-    return rcpp_result_gen;
-END_RCPP
-}
-// determine_block_length
-double determine_block_length(const arma::mat& x);
-RcppExport SEXP _sparseVARboot_determine_block_length(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(determine_block_length(x));
-    return rcpp_result_gen;
-END_RCPP
-}
 // gen_VAR
 arma::mat gen_VAR(const arma::mat& u, const arma::mat& ar, const arma::mat& init, const bool& include_init);
 RcppExport SEXP _sparseVARboot_gen_VAR(SEXP uSEXP, SEXP arSEXP, SEXP initSEXP, SEXP include_initSEXP) {
@@ -91,76 +67,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // boot_means_R
-Rcpp::List boot_means_R(const arma::mat& x, const arma::mat oracle_A, const arma::mat oracle_u, const int& boot, const int& p, const double& l, const bool& abs_val, const arma::vec& q, const int& B, const bool& show_progress, const int& penalization, const double& nbr_lambdas, const double& lambda_ratio, const int& selection, const double& eps, const bool& pen_own, const bool& only_lag1, const double& c, const unsigned int K, double improvement_thresh, unsigned int Nsim, const double& alpha);
-RcppExport SEXP _sparseVARboot_boot_means_R(SEXP xSEXP, SEXP oracle_ASEXP, SEXP oracle_uSEXP, SEXP bootSEXP, SEXP pSEXP, SEXP lSEXP, SEXP abs_valSEXP, SEXP qSEXP, SEXP BSEXP, SEXP show_progressSEXP, SEXP penalizationSEXP, SEXP nbr_lambdasSEXP, SEXP lambda_ratioSEXP, SEXP selectionSEXP, SEXP epsSEXP, SEXP pen_ownSEXP, SEXP only_lag1SEXP, SEXP cSEXP, SEXP KSEXP, SEXP improvement_threshSEXP, SEXP NsimSEXP, SEXP alphaSEXP) {
+Rcpp::List boot_means_R(const arma::mat& x, const arma::mat& oracle_A, const arma::mat& oracle_u, const double& mu0, const int& boot, const int& p, const double& l, const bool& abs_val, const bool& standardize, const arma::vec& q, const int& B, const bool& show_progress, const int& penalization, const double& nbr_lambdas, const double& lambda_ratio, const int& selection, const double& eps, const bool& pen_own, const bool& only_lag1, const double& c, const unsigned int& K, const double& improvement_thresh, const unsigned int& Nsim, const double& alpha);
+RcppExport SEXP _sparseVARboot_boot_means_R(SEXP xSEXP, SEXP oracle_ASEXP, SEXP oracle_uSEXP, SEXP mu0SEXP, SEXP bootSEXP, SEXP pSEXP, SEXP lSEXP, SEXP abs_valSEXP, SEXP standardizeSEXP, SEXP qSEXP, SEXP BSEXP, SEXP show_progressSEXP, SEXP penalizationSEXP, SEXP nbr_lambdasSEXP, SEXP lambda_ratioSEXP, SEXP selectionSEXP, SEXP epsSEXP, SEXP pen_ownSEXP, SEXP only_lag1SEXP, SEXP cSEXP, SEXP KSEXP, SEXP improvement_threshSEXP, SEXP NsimSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::mat >::type oracle_A(oracle_ASEXP);
-    Rcpp::traits::input_parameter< const arma::mat >::type oracle_u(oracle_uSEXP);
-    Rcpp::traits::input_parameter< const int& >::type boot(bootSEXP);
-    Rcpp::traits::input_parameter< const int& >::type p(pSEXP);
-    Rcpp::traits::input_parameter< const double& >::type l(lSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type abs_val(abs_valSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type q(qSEXP);
-    Rcpp::traits::input_parameter< const int& >::type B(BSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type show_progress(show_progressSEXP);
-    Rcpp::traits::input_parameter< const int& >::type penalization(penalizationSEXP);
-    Rcpp::traits::input_parameter< const double& >::type nbr_lambdas(nbr_lambdasSEXP);
-    Rcpp::traits::input_parameter< const double& >::type lambda_ratio(lambda_ratioSEXP);
-    Rcpp::traits::input_parameter< const int& >::type selection(selectionSEXP);
-    Rcpp::traits::input_parameter< const double& >::type eps(epsSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type pen_own(pen_ownSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type only_lag1(only_lag1SEXP);
-    Rcpp::traits::input_parameter< const double& >::type c(cSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type K(KSEXP);
-    Rcpp::traits::input_parameter< double >::type improvement_thresh(improvement_threshSEXP);
-    Rcpp::traits::input_parameter< unsigned int >::type Nsim(NsimSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(boot_means_R(x, oracle_A, oracle_u, boot, p, l, abs_val, q, B, show_progress, penalization, nbr_lambdas, lambda_ratio, selection, eps, pen_own, only_lag1, c, K, improvement_thresh, Nsim, alpha));
-    return rcpp_result_gen;
-END_RCPP
-}
-// boot_means_SD_R
-Rcpp::List boot_means_SD_R(const arma::mat& x, const arma::mat oracle_A, const arma::mat oracle_u, const int& boot, const int& p, const double& l, const bool& abs_val, const arma::vec& q, const int& B, const bool& show_progress, const int& penalization, const double& nbr_lambdas, const double& lambda_ratio, const int& selection, const double& eps, const bool& pen_own, const bool& only_lag1, const double& c, const unsigned int K, double improvement_thresh, unsigned int Nsim, const double& alpha);
-RcppExport SEXP _sparseVARboot_boot_means_SD_R(SEXP xSEXP, SEXP oracle_ASEXP, SEXP oracle_uSEXP, SEXP bootSEXP, SEXP pSEXP, SEXP lSEXP, SEXP abs_valSEXP, SEXP qSEXP, SEXP BSEXP, SEXP show_progressSEXP, SEXP penalizationSEXP, SEXP nbr_lambdasSEXP, SEXP lambda_ratioSEXP, SEXP selectionSEXP, SEXP epsSEXP, SEXP pen_ownSEXP, SEXP only_lag1SEXP, SEXP cSEXP, SEXP KSEXP, SEXP improvement_threshSEXP, SEXP NsimSEXP, SEXP alphaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::mat >::type oracle_A(oracle_ASEXP);
-    Rcpp::traits::input_parameter< const arma::mat >::type oracle_u(oracle_uSEXP);
-    Rcpp::traits::input_parameter< const int& >::type boot(bootSEXP);
-    Rcpp::traits::input_parameter< const int& >::type p(pSEXP);
-    Rcpp::traits::input_parameter< const double& >::type l(lSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type abs_val(abs_valSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type q(qSEXP);
-    Rcpp::traits::input_parameter< const int& >::type B(BSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type show_progress(show_progressSEXP);
-    Rcpp::traits::input_parameter< const int& >::type penalization(penalizationSEXP);
-    Rcpp::traits::input_parameter< const double& >::type nbr_lambdas(nbr_lambdasSEXP);
-    Rcpp::traits::input_parameter< const double& >::type lambda_ratio(lambda_ratioSEXP);
-    Rcpp::traits::input_parameter< const int& >::type selection(selectionSEXP);
-    Rcpp::traits::input_parameter< const double& >::type eps(epsSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type pen_own(pen_ownSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type only_lag1(only_lag1SEXP);
-    Rcpp::traits::input_parameter< const double& >::type c(cSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type K(KSEXP);
-    Rcpp::traits::input_parameter< double >::type improvement_thresh(improvement_threshSEXP);
-    Rcpp::traits::input_parameter< unsigned int >::type Nsim(NsimSEXP);
-    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(boot_means_SD_R(x, oracle_A, oracle_u, boot, p, l, abs_val, q, B, show_progress, penalization, nbr_lambdas, lambda_ratio, selection, eps, pen_own, only_lag1, c, K, improvement_thresh, Nsim, alpha));
-    return rcpp_result_gen;
-END_RCPP
-}
-// boot_means_clean_R
-Rcpp::List boot_means_clean_R(const arma::mat& x, const double& mu0, const int& boot, const int& p, const double& l, const bool& abs_val, const bool& standardize, const arma::vec& q, const int& B, const bool& show_progress, const int& penalization, const double& nbr_lambdas, const double& lambda_ratio, const int& selection, const double& eps, const bool& pen_own, const bool& only_lag1, const double& c, const unsigned int K, double improvement_thresh, unsigned int Nsim, const double& alpha);
-RcppExport SEXP _sparseVARboot_boot_means_clean_R(SEXP xSEXP, SEXP mu0SEXP, SEXP bootSEXP, SEXP pSEXP, SEXP lSEXP, SEXP abs_valSEXP, SEXP standardizeSEXP, SEXP qSEXP, SEXP BSEXP, SEXP show_progressSEXP, SEXP penalizationSEXP, SEXP nbr_lambdasSEXP, SEXP lambda_ratioSEXP, SEXP selectionSEXP, SEXP epsSEXP, SEXP pen_ownSEXP, SEXP only_lag1SEXP, SEXP cSEXP, SEXP KSEXP, SEXP improvement_threshSEXP, SEXP NsimSEXP, SEXP alphaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type oracle_A(oracle_ASEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type oracle_u(oracle_uSEXP);
     Rcpp::traits::input_parameter< const double& >::type mu0(mu0SEXP);
     Rcpp::traits::input_parameter< const int& >::type boot(bootSEXP);
     Rcpp::traits::input_parameter< const int& >::type p(pSEXP);
@@ -178,11 +92,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const bool& >::type pen_own(pen_ownSEXP);
     Rcpp::traits::input_parameter< const bool& >::type only_lag1(only_lag1SEXP);
     Rcpp::traits::input_parameter< const double& >::type c(cSEXP);
-    Rcpp::traits::input_parameter< const unsigned int >::type K(KSEXP);
-    Rcpp::traits::input_parameter< double >::type improvement_thresh(improvement_threshSEXP);
-    Rcpp::traits::input_parameter< unsigned int >::type Nsim(NsimSEXP);
+    Rcpp::traits::input_parameter< const unsigned int& >::type K(KSEXP);
+    Rcpp::traits::input_parameter< const double& >::type improvement_thresh(improvement_threshSEXP);
+    Rcpp::traits::input_parameter< const unsigned int& >::type Nsim(NsimSEXP);
     Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(boot_means_clean_R(x, mu0, boot, p, l, abs_val, standardize, q, B, show_progress, penalization, nbr_lambdas, lambda_ratio, selection, eps, pen_own, only_lag1, c, K, improvement_thresh, Nsim, alpha));
+    rcpp_result_gen = Rcpp::wrap(boot_means_R(x, oracle_A, oracle_u, mu0, boot, p, l, abs_val, standardize, q, B, show_progress, penalization, nbr_lambdas, lambda_ratio, selection, eps, pen_own, only_lag1, c, K, improvement_thresh, Nsim, alpha));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -226,15 +140,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_sparseVARboot_VAR_determine_p", (DL_FUNC) &_sparseVARboot_VAR_determine_p, 3},
-    {"_sparseVARboot_determine_block_length", (DL_FUNC) &_sparseVARboot_determine_block_length, 1},
     {"_sparseVARboot_gen_VAR", (DL_FUNC) &_sparseVARboot_gen_VAR, 4},
     {"_sparseVARboot_sim_mvn_chol", (DL_FUNC) &_sparseVARboot_sim_mvn_chol, 2},
     {"_sparseVARboot_sim_VAR_cpp", (DL_FUNC) &_sparseVARboot_sim_VAR_cpp, 4},
     {"_sparseVARboot_sim_VAR_cpp_both", (DL_FUNC) &_sparseVARboot_sim_VAR_cpp_both, 4},
-    {"_sparseVARboot_boot_means_R", (DL_FUNC) &_sparseVARboot_boot_means_R, 22},
-    {"_sparseVARboot_boot_means_SD_R", (DL_FUNC) &_sparseVARboot_boot_means_SD_R, 22},
-    {"_sparseVARboot_boot_means_clean_R", (DL_FUNC) &_sparseVARboot_boot_means_clean_R, 22},
+    {"_sparseVARboot_boot_means_R", (DL_FUNC) &_sparseVARboot_boot_means_R, 24},
     {"_sparseVARboot_VAR_R", (DL_FUNC) &_sparseVARboot_VAR_R, 3},
     {"_sparseVARboot_sparseVAR_R", (DL_FUNC) &_sparseVARboot_sparseVAR_R, 15},
     {NULL, NULL, 0}
