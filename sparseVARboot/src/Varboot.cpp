@@ -127,7 +127,7 @@ VAR_out_plus VAR_residuals(const arma::mat& y, const VAR_out_plus& V, const doub
     const unsigned int k = A.n_cols;
     const unsigned int p = A.n_rows / k;
     arma::mat lags_y = lag_matrix(y, p, false);
-    W.resid = y - lags_y * A;
+    W.resid = y - lags_y * A.t();
   }
   return W;
 }
@@ -263,6 +263,17 @@ arma::mat sim_mvn_chol(const arma::mat& Sigma, const unsigned int& T) {
   return Y;
 }
 
+arma::cube sim_cube_norm(const arma::mat& Sigma, const unsigned int& T, const unsigned int& B) {
+  unsigned int N = Sigma.n_rows;
+  const arma::sp_mat Sigma_sqrt = sp_mat(chol(Sigma));
+  const arma::mat Z = custom_rnorm(T, N * B);
+  arma::cube Y(T, N, B);
+  for (unsigned int b = 0; b < B; b++) {
+    Y.slice(b) = Z.cols(b * N, (b + 1) * N - 1) * Sigma_sqrt;
+  }
+  return Y;
+}
+
 // [[Rcpp::export]]
 arma::mat sim_VAR_cpp(const unsigned int& T, const arma::mat& ar, const arma::mat& Sigma,
                       const unsigned int& burn){
@@ -297,6 +308,11 @@ arma::mat SWB(const arma::mat& e, const arma::vec& z,
   const arma::mat e_star = repelem(z, 1, k) % e; //step 7 of the bootstrap algorithm
   arma::mat x_star = gen_VAR(e_star, ar_est, init, false);
   return x_star.tail_rows(T);
+}
+
+arma::mat GPI(const arma::vec& z){
+  arma::mat x_star = z;
+  return x_star;
 }
 
 arma::mat MBB(const arma::mat& x, const arma::uvec& i, const int& l){
@@ -416,6 +432,38 @@ struct boot_sample_VAR_SWB : public RcppParallel::Worker
   void operator()(std::size_t begin, std::size_t end) { 
     for (std::size_t iB = begin; iB < end; iB++) { //step 5 of the bootstrap algorithm
       x_boot.slice(iB) = SWB(e, z.col(iB), ar, init);
+      means_boot.slice(iB) = sorted_stats(x_boot.slice(iB), abs_val, standardize);
+      prog.increment();
+    }
+  }
+};
+
+struct boot_sample_GPI : public RcppParallel::Worker
+{
+  // inputs
+  const arma::cube& z;
+  const arma::mat& smeans;
+  const bool& abs_val;
+  const bool& standardize;
+  const unsigned int N = z.n_cols;
+  const unsigned int B = z.n_slices;
+  
+  // Output
+  arma::cube& means_boot;
+  arma::cube& x_boot;
+  progress& prog;
+  
+  // initialize with source and destination
+  boot_sample_GPI(const arma::cube& z,const arma::mat& smeans, const bool& abs_val, 
+                  const bool& standardize, 
+                  arma::cube& means_boot, arma::cube& x_boot, progress& prog)
+    : z(z), smeans(smeans), abs_val(abs_val), standardize(standardize), 
+      means_boot(means_boot), x_boot(x_boot), prog(prog) {}
+  
+  // Bootstrap
+  void operator()(std::size_t begin, std::size_t end) { 
+    for (std::size_t iB = begin; iB < end; iB++) { //step 5 of the bootstrap algorithm
+      x_boot.slice(iB) = GPI(z.slice(iB));
       means_boot.slice(iB) = sorted_stats(x_boot.slice(iB), abs_val, standardize);
       prog.increment();
     }
@@ -581,6 +629,21 @@ VAR_out_plus VAR_estimation(const arma::mat& xd, const int& p, const int& penali
   return out2;
 }
 
+arma::mat lr_covmat(const VAR_out_plus& V) {
+  const arma::mat &A = V.coef_post.t();
+  const unsigned int k = A.n_rows;
+  const unsigned int p = A.n_cols / k;
+  arma::mat A1 = eye(k, k);
+  for (unsigned int j = 0; j < p; j++) {
+    A1 = A1 - A.rows(j * k, (j + 1) * k - 1);
+  }
+  const arma::mat B1 = inv(A1);
+  const arma::mat &e = V.resid;
+  const arma::mat Sigma = e.t() * e / e.n_rows;
+  const arma::mat lrv = B1 * Sigma * B1.t();
+  return lrv;
+}
+
 boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot, 
                           const int& p, const int& l, 
                          const bool& abs_val, const bool& standardize, 
@@ -620,7 +683,7 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
   }
   l_int = round(pars.l);
 
-  if (boot == 1 | boot == 2) {
+  if (boot == 1 | boot == 2 | boot == 6) {
     if (penalization != -1) {
       out_boot.par = pars.p;
       out = VAR_estimation(xd, pars.p, penalization, nbr_lambdas, lambda_ratio, selection,
@@ -675,6 +738,12 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
     const arma::sp_mat s = DWB_matrix(T, pars.l);
     const arma::mat z = custom_rnorm(T, B, 0, 1);
     boot_sample_DWB boot_sample_x(xd, z, s, smeans, abs_val, standardize, means_boot,
+                                  x_boot, prog);
+    RcppParallel::parallelFor(0, B, boot_sample_x);
+  } else if (boot == 6){
+    const arma::mat s = lr_covmat(out);
+    const arma::cube z = sim_cube_norm(s, T, B);
+    boot_sample_GPI boot_sample_x(z, smeans, abs_val, standardize, means_boot,
                                   x_boot, prog);
     RcppParallel::parallelFor(0, B, boot_sample_x);
   }
