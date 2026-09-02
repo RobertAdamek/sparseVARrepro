@@ -74,4 +74,4 @@ if (parallel_sims) {
   parallel::stopCluster(cl)
 }
 
-save(reject, file = "/home/output/dgp0_size.RData")
+save(reject, file = "../Results/dgp0_size.RData")

@@ -65,4 +65,4 @@ if (parallel_sims) {
   parallel::stopCluster(cl)
 }
 
-save(reject, file = "/home/output/dgp1_power_mu05_prop05.RData")
+save(reject, file = "../Results/dgp1_power_mu05_prop05.RData")

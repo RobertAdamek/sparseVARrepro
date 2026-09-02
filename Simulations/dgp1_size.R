@@ -1,35 +1,25 @@
 # Simulation Script
 rm(list=ls())
-#install.packages("/home/radamek/bootstrap_stuff/sparseVARboot_0.4.0.tar.gz", repos=NULL, type="source")
+setwd(this.path::here())
 
 library(sparseVARboot)
 library(parallel)
 
 #### Sourcing scripts ####
-source("/home/DGP.R") # R-script that collects relevant DGPs
-source("/home/Simulation.R")
+source("DGP.R") # R-script that collects relevant DGPs
+source("Simulation.R")
+source("Common_Parameters.R")
 
 set.seed(200320251)
 
-# Sample sizes
-n <- c(50, 100, 200, 500) 
-N <- c(20, 40, 100, 200)
 # DGPs
 type <- 1
 # Mean
 mu <- 0
 # Proportion
 prop <- 1
-# Simulations
-sim <- 1000
-# Bootstrap replications
-B <- 199
-# Confidence level
-level <- c(0.9, 0.95, 0.99)
 # Methods
-boot = c("VAR-L1-unpen-own-BIC", 
-         "VAR-L1-unpen-own-TF-11",
-         "MBB", "BWB", "VAR-oracle")
+boot <- c(boot, "VAR-oracle")
 
 pars <- expand.grid(mean = mu, prop = prop, n = n, N = N, DGP = type)
 parsnames <- paste0("(DGP ", pars$DGP, ", N = ", pars$N, ", n = ", pars$n, 
@@ -75,4 +65,4 @@ if (parallel_sims) {
   parallel::stopCluster(cl)
 }
 
-save(reject, file = "/home/output/dgp1_size.RData")
+save(reject, file = "../Results/dgp1_size.RData")
