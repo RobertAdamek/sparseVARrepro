@@ -5,7 +5,7 @@ sparseVAR <- function(Y, p, trim, pen, nbr_lambdas, lambda_ratio, eps, selection
 }
 
 #' @export
-boot_means <- function(x, oracle_A, oracle_u, boot = 1, p = 0, l = 0, abs_val = TRUE, q = 0.95, B = 9999,
+boot_means <- function(x, oracle_A, oracle_u, mu0 = 0, boot = 1, p = 0, l = 0, abs_val = TRUE, standardize = FALSE, q = 0.95, B = 9999,
                        penalization = 1, nbr_lambdas = 10, lambda_ratio = 100,
                        selection = 1, eps = 0.001, show_progress = TRUE, n_cores = NULL,
                        pen_own = T, only_lag1 = F, c = 0.8, K = 15, improvement_thresh = 0.01, 
@@ -15,7 +15,7 @@ boot_means <- function(x, oracle_A, oracle_u, boot = 1, p = 0, l = 0, abs_val = 
   }
   RcppParallel::setThreadOptions(numThreads = n_cores)
   
-  boot_means_R(x, oracle_A, oracle_u, boot, p, l, abs_val, q, B, show_progress,
+  boot_means_R(x, oracle_A, oracle_u, mu0, boot, p, l, abs_val, standardize, q, B, show_progress,
                penalization, nbr_lambdas, lambda_ratio, selection, eps, pen_own, only_lag1, c, K, improvement_thresh, Nsim, alpha)
 }
 

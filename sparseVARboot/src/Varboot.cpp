@@ -329,7 +329,7 @@ arma::mat MBB(const arma::mat& x, const arma::uvec& i, const int& l){
 arma::mat BWB(const arma::mat& x, const arma::vec& z, const int& l){
   const int T = x.n_rows;
   const int N = x.n_cols;
-  const arma::mat xi_rep = repelem(z, l, 2*N);
+  const arma::mat xi_rep = repelem(z, l, N);
   const arma::mat x_star = x % xi_rep.head_rows(T);
   return x_star;
 }
@@ -355,7 +355,7 @@ arma::sp_mat DWB_matrix(const unsigned int& T, const double& l){
   double lb, x;
   for (unsigned int i = 0; i < T; i++) {
     lb = std::max(i - l, 0.0);
-    for (unsigned int j = floor(lb); j <= i; j++) {
+    for (unsigned int j = ceil(lb); j <= i; j++) {
       x = (i - j) / l;
       a(i, j) = DWB_kernel(x);
     }
@@ -577,19 +577,20 @@ struct boot_sample_DWB : public RcppParallel::Worker
 
 struct tune {
   double l;
-  unsigned int p;
+  int p;
 };
 
 tune tuning_parameters(const int& boot, const int& p, const int& l, const arma::mat& x) {
   double l_unrounded;
   tune tune;
   unsigned int T = x.n_rows;
-  if (boot == 1 | boot == 2){
+  if (boot == 1 | boot == 2 | boot == 6){
     if (p == 0) {
       tune.p = VAR_determine_p(x);
     } else {
       tune.p = p;
     }
+    tune.l = -1.0;
   } else {
     if (l == 0.0) {
       l_unrounded = determine_block_length(x);
@@ -597,6 +598,7 @@ tune tuning_parameters(const int& boot, const int& p, const int& l, const arma::
       l_unrounded = l;
     }
     tune.l = std::max(1.0, std::min(l_unrounded, double(T)/2.0));
+    tune.p = -1;
   }
   return tune;
 }
@@ -625,14 +627,15 @@ VAR_out_plus VAR_estimation(const arma::mat& xd, const int& p, const int& penali
   out2.coef_post = out.coef;
   out2.lambda = out.lambda;
   out2.lambdas = out.lambdas;
-  out2 = VAR_residuals(xd,out2);
+  out2.resid = out.resid;
+  out2 = VAR_residuals(xd, out2);
   return out2;
 }
 
 arma::mat lr_covmat(const VAR_out_plus& V) {
-  const arma::mat &A = V.coef_post.t();
-  const unsigned int k = A.n_rows;
-  const unsigned int p = A.n_cols / k;
+  const arma::mat &A = V.coef_post;
+  const unsigned int k = A.n_cols;
+  const unsigned int p = A.n_rows / k;
   arma::mat A1 = eye(k, k);
   for (unsigned int j = 0; j < p; j++) {
     A1 = A1 - A.rows(j * k, (j + 1) * k - 1);
@@ -646,15 +649,15 @@ arma::mat lr_covmat(const VAR_out_plus& V) {
 
 boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot, 
                           const int& p, const int& l, 
-                         const bool& abs_val, const bool& standardize, 
-                         const arma::vec& q, const int& B, const arma::mat& init, 
-                         const bool& show_progress, const int& penalization, 
-                         const double& nbr_lambdas, const double& lambda_ratio, 
-                         const int& selection, const double& eps, const bool& pen_own, 
-                         const bool& only_lag1, const double& c, 
-                         const unsigned int& K, const double& improvement_thresh, const unsigned int& Nsim, 
-                         const double& alpha,
-                         const arma::mat& oracle_A, const arma::mat& oracle_u) {
+                          const bool& abs_val, const bool& standardize, 
+                          const arma::vec& q, const int& B, const arma::mat& init, 
+                          const bool& show_progress, const int& penalization, 
+                          const double& nbr_lambdas, const double& lambda_ratio, 
+                          const int& selection, const double& eps, const bool& pen_own, 
+                          const bool& only_lag1, const double& c, 
+                          const unsigned int& K, const double& improvement_thresh, const unsigned int& Nsim, 
+                          const double& alpha,
+                          const arma::mat& oracle_A, const arma::mat& oracle_u) {
   // x: this is the raw data, once demeaned we call it xd
   // penalization: integer, 0 (no penalization), 1 (L1), 2 (HLag)
   // nbr_lambdas : double, number of sparsity parameters to consider in grid (for simplicity set as double)
@@ -681,8 +684,10 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
     pars.p = p;
     pars.l = l;
   }
-  l_int = round(pars.l);
 
+  l_int = round(pars.l);
+  std::cout << boot << std::endl;
+  
   if (boot == 1 | boot == 2 | boot == 6) {
     if (penalization != -1) {
       out_boot.par = pars.p;
@@ -746,6 +751,7 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
     boot_sample_GPI boot_sample_x(z, smeans, abs_val, standardize, means_boot,
                                   x_boot, prog);
     RcppParallel::parallelFor(0, B, boot_sample_x);
+    std::cout << "check" << std::endl;
   }
   
   arma::vec max_boot_means = means_boot.subcube(0, 0, 0, 0, 0, B - 1); //step 9 in the bootstrap algorithm
