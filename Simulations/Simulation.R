@@ -1,66 +1,3 @@
-# simulate_boot <- function(pars, boot, B, level, p = 0, l = 0, selection = 1, parallel_sims = TRUE) {
-#   if (parallel_sims) {
-#     n_cores <- 1
-#   } else {
-#     n_cores <- NULL
-#   }
-#   reject <- array(dim = c(length(boot), length(level)))
-#   dimnames(reject) <- list(boot = boot, level = 1 - level)
-#   
-#   tuning <- rep(NA, length(boot))
-#   names(tuning) <- boot
-#   
-#   x <- sim_DGP(n = pars$n, N = pars$N, type = pars$DGP, mu = pars$mean, prop = pars$prop)
-#   for (b in 1:length(boot)) {
-#     boot_method <- 1*(boot[b] == "VAR-L1") + 1*(boot[b] == "VAR-HL") + 
-#       4*(boot[b] == "MBB") + 3*(boot[b] == "BWB")
-#     pen <- 1*(boot[b] == "VAR-L1") + 2*(boot[b] == "VAR-HL")
-#     out <- boot_means(x = x, boot = boot_method, penalization = pen, p = p, l = l, 
-#                       B = B, q = level, selection = selection, show_progress = FALSE, n_cores = n_cores)
-#     reject[b, ] <- out$mean > out$boot_quantiles
-#     tuning[b] <- out$par
-#   }
-#   return(list(reject = reject, tuning = tuning))
-# }
-# 
-# simulate_boot_penalization <- function(pars, boot, B, level, p = 0, l = 0, selection = 1, parallel_sims = TRUE) {
-#   if (parallel_sims) {
-#     n_cores <- 1
-#   } else {
-#     n_cores <- NULL
-#   }
-#   reject <- array(dim = c(length(boot), length(level)))
-#   dimnames(reject) <- list(boot = boot, level = 1 - level)
-#   
-#   tuning <- rep(NA, length(boot))
-#   names(tuning) <- boot
-#   
-#   x <- sim_DGP(n = pars$n, N = pars$N, type = pars$DGP, mu = pars$mean, prop = pars$prop)
-#   for (b in 1:length(boot)) {
-#     boot_method <- 1 # VAR bootstrap
-#     pen <- 1 #VAR bootstrap with L1 penalizqtion 
-#     
-#     if(boot[b]=="VAR-L1-pen"){
-#       pen_own <- TRUE # Penalize own lags
-#     }else{
-#       pen_own <- FALSE # Do not penalize own lags
-#     }
-#     if(boot[b]=="VAR-L1-unpen-own-1"){
-#       only_lag1 <- TRUE # Only penalize own lag 1
-#     }else{
-#       only_lag1 <- FALSE # Penalize own lag 1 to p
-#     }
-# 
-#     out <- boot_means(x = x, boot = boot_method, penalization = pen, p = p, l = l, 
-#                       B = B, q = level, selection = selection, show_progress = FALSE, n_cores = n_cores,
-#                       pen_own = pen_own, only_lag1 = only_lag1)
-#     
-#     reject[b, ] <- out$mean > out$boot_quantiles
-#     tuning[b] <- out$par
-#   }
-#   return(list(reject = reject, tuning = tuning))
-# }
-
 simulate_boot_all_methods <- function(pars, boot, B, level, p = 0, l = 0,
                                       abs_val = FALSE, standardize = FALSE, 
                                       parallel_sims = TRUE) {
@@ -90,8 +27,12 @@ simulate_boot_all_methods <- function(pars, boot, B, level, p = 0, l = 0,
   sD <- sim_DGP(n = pars$n, N = pars$N, type = pars$DGP, mu = pars$mean, prop = pars$prop)
   x <- sD$x
   for (b in 1:length(boot)) {
-    if (substring(boot[b], 1, 6) == "VAR-L1") {
-      boot_method <- 1
+    if (substring(boot[b], 1, 6) == "VAR-L1" | substring(boot[b], 1, 6) == "VAR-GP") {
+      if (substring(boot[b], 1, 6) == "VAR-L1") {
+        boot_method <- 1
+      } else if (substring(boot[b], 1, 6) == "VAR-GP") {
+        boot_method <- 6
+      }
       pen <- 1 #VAR bootstrap with L1 penalizqtion 
       if (grepl("BIC", boot[b])) {
         selection <- 1
