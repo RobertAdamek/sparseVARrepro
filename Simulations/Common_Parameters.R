@@ -1,10 +1,10 @@
 # Sample sizes
-n <- c(50, 100, 200, 500) 
-N <- c(20, 40, 100, 200)
+n <- c(50)#, 100, 200, 500) 
+N <- c(20)#, 40, 100, 200)
 # Simulations
-sim <- 1000 
+sim <- 10 
 # Bootstrap replications
-B <- 199
+B <- 19
 # Confidence level
 level <- c(0.9, 0.95, 0.99)
 # Methods
