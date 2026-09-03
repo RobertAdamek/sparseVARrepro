@@ -463,25 +463,25 @@ arma::mat lag_matrix(const arma::mat& x, const int& p, const bool& trim) {//step
 
 double Andrews91_truncation(const arma::mat& What, const unsigned int& T_, const unsigned int& h){
   arma::vec rhos(h), variances(h);
-  arma::vec y_T(T_-1), y_Tm1(T_-1), constant(T_-1,fill::ones), residual(T_-1);
-  arma::mat X_T(T_-1,2);
+  arma::vec y_T(T_ - 1), y_Tm1(T_ - 1), constant(T_ - 1, fill::ones), residual(T_ - 1);
+  arma::mat X_T(T_ - 1, 2);
   arma::vec beta(2);
-  for(unsigned int i=0; i<h; i++){
-    y_T=What.submat(1,i,T_-1,i);
-    y_Tm1=What.submat(0,i,T_-2,i);
-    X_T=join_horiz(constant,y_Tm1);
-    beta=inv(X_T.t()*X_T)*X_T.t()*y_T;
-    residual=y_T-X_T*beta;
-    rhos(i)=beta(1);
-    variances(i)=as_scalar(residual.t()*residual)/double(double(T_)-2.0);
+  for(unsigned int i = 0; i < h; i++){
+    y_T = What.submat(1, i, T_ - 1, i);
+    y_Tm1 = What.submat(0, i, T_ - 2, i);
+    X_T = join_horiz(constant, y_Tm1);
+    beta = inv_sympd(X_T.t() * X_T) * X_T.t() * y_T;
+    residual = y_T - X_T * beta;
+    rhos(i) = beta(1);
+    variances(i) = as_scalar(residual.t() * residual) / double(double(T_) - 2.0);
   }
-  double numerator=0, denominator=0;
-  for(unsigned int i=0; i<h; i++){
-    numerator+=4*pow(rhos(i),2)*pow(variances(i),2)/double(pow(1-rhos(i),6)*pow(1+rhos(i),2));
-    denominator+=pow(variances(i),2)/double(pow(1-rhos(i),4));
+  double numerator = 0, denominator = 0;
+  for(unsigned int i = 0; i < h; i++){
+    numerator += 4.0 * pow(rhos(i), 2) * pow(variances(i), 2) / pow(1.0 - rhos(i), 6) * pow(1.0 + rhos(i), 2));
+    denominator += pow(variances(i), 2) / pow(1.0 - rhos(i), 4);
   }
-  double alphahat1=numerator/double(denominator);
-  double S_T=1.1447*pow(alphahat1*double(T_),double(1.0/double(3.0)));
+  double alphahat1 = numerator / denominator;
+  double S_T = 1.1447 * pow(alphahat1 * double(T_), 1.0 / 3.0));
   return S_T;
 }
 
@@ -494,13 +494,13 @@ arma::mat LRVestimator(const arma::mat& U, const arma::mat& X, const double& LRV
   const unsigned int& T_ = X.n_rows; // number of time points
   const unsigned int& Nd = N*d; // dimension of the long-run variance
   
-  arma::mat Omegahat(Nd, Nd,fill::zeros);
+  arma::mat Omegahat(Nd, Nd, fill::zeros);
   arma::mat What(T_, Nd);
   arma::mat Xi_ell(Nd, Nd);
   unsigned int counter = 0;
-  for(unsigned int ui=0; ui < d; ui++){
-    for(unsigned int xj=0; xj < N; xj++){
-      What.col(counter)= U.col(ui)%X.col(xj);
+  for (unsigned int ui = 0; ui < d; ui++){
+    for (unsigned int xj = 0; xj < N; xj++){
+      What.col(counter) = U.col(ui) % X.col(xj);
       counter = counter + 1;
     }
   }

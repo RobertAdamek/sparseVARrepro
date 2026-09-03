@@ -22,11 +22,7 @@ prop <- 1
 boot <- c(boot, "VAR-oracle")
 
 pars <- expand.grid(mean = mu, prop = prop, n = n, N = N, DGP = type)
-
 reject <- simulations(pars = pars, boot = boot, mu0 = mu0, sim = sim, B = B, level = level, p = 0, l = 0, 
                                   abs_val = abs_val, standardize = standardize, parallel_sims = parallel_sims)
 
 save(reject, file = "../Results/dgp2_size.RData")
-
-bb <- simulate_boot_all_methods(pars = pars[1, ], mu0 = mu0, boot = boot[6], B = B, level = level, 
-                          p = 0, l = 0, abs_val = abs_val, standardize = standardize, parallel_sims = parallel_sims)

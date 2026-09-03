@@ -1,6 +1,7 @@
 # install package
 # setwd(this.path::here())
 # install.packages("../sparseVARboot_0.5.0.tar.gz", type = "local")
+library(sparseVARboot)
 
 # But for us, if we want to change things, the following way is easier
 setwd(this.path::here())

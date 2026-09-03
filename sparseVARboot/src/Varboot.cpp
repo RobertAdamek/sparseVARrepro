@@ -310,7 +310,7 @@ arma::mat SWB(const arma::mat& e, const arma::vec& z,
   return x_star.tail_rows(T);
 }
 
-arma::mat GPI(const arma::vec& z){
+arma::mat GPI(const arma::mat& z){
   arma::mat x_star = z;
   return x_star;
 }
@@ -686,7 +686,6 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
   }
 
   l_int = round(pars.l);
-  std::cout << boot << std::endl;
   
   if (boot == 1 | boot == 2 | boot == 6) {
     if (penalization != -1) {
@@ -751,7 +750,6 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
     boot_sample_GPI boot_sample_x(z, smeans, abs_val, standardize, means_boot,
                                   x_boot, prog);
     RcppParallel::parallelFor(0, B, boot_sample_x);
-    std::cout << "check" << std::endl;
   }
   
   arma::vec max_boot_means = means_boot.subcube(0, 0, 0, 0, 0, B - 1); //step 9 in the bootstrap algorithm
