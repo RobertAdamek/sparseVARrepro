@@ -179,14 +179,13 @@ int VAR_determine_p(const arma::mat& x, const int& pmax = 10, const int& criteri
   arma::vec IC(pmax, fill::zeros);
   
   for (int ip = 0; ip < pmax; ip++) {
-    
-    for(int ik=0; ik < k; ik++){
-      fit = VAR(x.col(ik), ip, true);
-      resids.submat(0, ik, n-1, ik) = fit.resid; 
+    for (int ik = 0; ik < k; ik++){
+      fit = VAR(x.col(ik), ip + 1, true);
+      resids.submat(0, ik, n - 1, ik) = fit.resid; 
     }
     
     omega = diagmat(resids.t() * resids)/n;  
-    IC(ip) = log(det(omega)) + C_T*ip*k/n; 
+    IC(ip) = log(det(omega)) + C_T * (ip + 1) * k / n; 
   }
   
   const int popt = IC.index_min() + 1;
@@ -677,7 +676,6 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
   unsigned int l_int, nb;
   tune pars;
   boot_out out_boot;
-  
   if (penalization != -1) {
     pars = tuning_parameters(boot, p, l, xd);
   } else {

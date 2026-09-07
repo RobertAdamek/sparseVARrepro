@@ -1,6 +1,6 @@
 # Sample sizes
-n <- c(50)#, 100, 200, 500) 
-N <- c(20)#, 40, 100, 200)
+n <- c(50, 100)#, 200, 500) 
+N <- c(20, 40)#, 100, 200)
 # Simulations
 sim <- 1000
 # Bootstrap replications
@@ -15,8 +15,9 @@ boot <- c("VAR-L1-unpen-own-BIC",
           "MBB", "BWB", "DWB",
           "VAR-GP-unpen-own-BIC",
           "VAR-GP-unpen-own-TF-11")
+#boot <- "VAR-L1-unpen-own-TF-11"
 # parallel
-parallel_sims <- TRUE
+parallel_sims <- FALSE
 # test statistic is absolute value
 abs_val = TRUE
 # naive standardization
