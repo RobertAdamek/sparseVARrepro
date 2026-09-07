@@ -1,8 +1,8 @@
-simulations <- function(pars, boot, mu0, sim = 1000, B = 199, level = 0.95, p = 0, l = 0, 
+simulations <- function(pars, boot, mu0 = 0, sim = 1000, B = 199, level = 0.95, p = 0, l = 0, 
                         abs_val = TRUE, standardize = FALSE, parallel_sims = TRUE) {
   parsnames <- paste0("(DGP ", pars$DGP, ", N = ", pars$N, ", n = ", pars$n, 
                       ", N_mu = ", ceiling(pars$prop * pars$N), ", mu = ", pars$mean, 
-                      "), mu0 = ", mu0)
+                      ")")
   
   reject <- array(dim = c(nrow(pars), length(boot), length(level)))
   dimnames(reject) <- list(pars = parsnames, boot = boot, level = 1 - level)
@@ -16,25 +16,21 @@ simulations <- function(pars, boot, mu0, sim = 1000, B = 199, level = 0.95, p = 
     cl <- parallel::makeCluster(parallelly::availableCores(omit = 2))
     parallel::clusterExport(cl, varlist = ls(globalenv()))
     parallel::clusterEvalQ(cl, library(sparseVARboot))
-    parallel::clusterEvalQ(cl, source("DGP.R"))
-#    parallel::clusterEvalQ(cl, source("/home/Simulation.R"))
     parallel::clusterSetRNGStream(cl, sample.int(2^20, size = 1))
   }
   
   for (i in 1:nrow(pars)) {
+    parsi = pars[i, ]
     if (parallel_sims) {
-      parallel::clusterExport(cl, varlist = "i")
       out <- parallel::parLapply(cl = cl, X = seeds, 
                                  fun = simulate_boot_all_methods, 
-                                 pars = pars[i, ], boot = boot, B = B, level = level, p = 0, l = 0, 
-                                 abs_val = abs_val, standardize = standardize, parallel_sims = parallel_sims
-      )
+                                 pars = pars[i, ], mu0 = mu0, boot = boot, B = B, level = level, p = 0, l = 0, 
+                                 abs_val = abs_val, standardize = standardize, parallel_sims = parallel_sims)
     } else {
       out <- lapply(X = seeds, 
                     FUN = simulate_boot_all_methods, 
-                    pars = pars[i, ], boot = boot, B = B, level = level, p = 0, l = 0, 
-                    abs_val = abs_val, standardize = standardize, parallel_sims = parallel_sims
-      )
+                    pars = pars[i, ], mu0 = mu0, boot = boot, B = B, level = level, p = 0, l = 0, 
+                    abs_val = abs_val, standardize = standardize, parallel_sims = parallel_sims)
     }
     reject[i, , ] <- apply(sapply(out, function(x){x$reject}, simplify = "array"), 1:2, mean)
     tuning[i, , ] <- sapply(out, function(x){x$tuning}, simplify = "array")
@@ -46,9 +42,10 @@ simulations <- function(pars, boot, mu0, sim = 1000, B = 199, level = 0.95, p = 
   return(reject)
 }
 
-simulate_boot_all_methods <- function(pars, mu0, boot, B, level, p = 0, l = 0,
+simulate_boot_all_methods <- function(seed, pars, mu0, boot, B, level, p = 0, l = 0,
                                       abs_val = TRUE, standardize = FALSE, 
                                       parallel_sims = TRUE) {
+  set.seed(seed)
   if (parallel_sims) {
     n_cores <- 1
   } else {
@@ -86,10 +83,10 @@ simulate_boot_all_methods <- function(pars, mu0, boot, B, level, p = 0, l = 0,
         selection <- 1
       } else if (grepl("PI", boot[b])) {
         selection <- 4
-        PI_c <- as.numeric(substring(boot[b], nchar(boot[b]) - 2, nchar(boot[b]))) / 10
+        PI_c <- as.numeric(substring(boot[b], nchar(boot[b]) - 1, nchar(boot[b]))) / 10
       } else if (grepl("TF", boot[b])) {
         selection <- 5
-        PI_c <- as.numeric(substring(boot[b], nchar(boot[b]) - 2, nchar(boot[b]))) / 10
+        PI_c <- as.numeric(substring(boot[b], nchar(boot[b]) - 1, nchar(boot[b]))) / 10
       }
       if (grepl("-pen-", boot[b])) {
         pen_own <- TRUE # Penalize own lags

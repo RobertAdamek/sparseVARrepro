@@ -2,9 +2,9 @@
 n <- c(50)#, 100, 200, 500) 
 N <- c(20)#, 40, 100, 200)
 # Simulations
-sim <- 10#00
+sim <- 1000
 # Bootstrap replications
-B <- 19#9
+B <- 199
 # Confidence level
 level <- c(0.9, 0.95, 0.99)
 # Null hypothesis
@@ -14,10 +14,9 @@ boot <- c("VAR-L1-unpen-own-BIC",
           "VAR-L1-unpen-own-TF-11", 
           "MBB", "BWB", "DWB",
           "VAR-GP-unpen-own-BIC",
-          "VAR-GP-unpen-own-TF-11",
-          "VAR-oracle")
+          "VAR-GP-unpen-own-TF-11")
 # parallel
-parallel_sims <- FALSE
+parallel_sims <- TRUE
 # test statistic is absolute value
 abs_val = TRUE
 # naive standardization

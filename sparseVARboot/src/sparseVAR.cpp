@@ -914,11 +914,11 @@ arma::mat coordinate_descent_covariance(const arma::mat& X, const arma::colvec& 
 
 arma::mat lasso(const arma::mat& X, const arma::colvec& y, const arma::vec& grid,
                    const double& opt_threshold){
-  unsigned int T_=X.n_rows;
-  unsigned int N=X.n_cols;
-  unsigned int gridsize=grid.n_elem;
-  arma::mat betahats(N,gridsize);
-  if(N>T_){
+  unsigned int T_ = X.n_rows;
+  unsigned int N = X.n_cols;
+  unsigned int gridsize = grid.n_elem;
+  arma::mat betahats(N, gridsize);
+  if(N > T_){
     betahats = coordinate_descent_naive(X, y, grid, opt_threshold,
                                         N, T_, gridsize);
   } else {
@@ -930,9 +930,9 @@ arma::mat lasso(const arma::mat& X, const arma::colvec& y, const arma::vec& grid
 
 arma::mat lasso_weighted(const arma::mat& X, const arma::colvec& y, const arma::vec& grid, const arma::vec& weights, 
                             const double& opt_threshold){
-  const arma::mat X_weighted = X.each_col() / weights; 
+  const arma::mat X_weighted = X.each_row() / weights.t(); 
   const arma::mat betahats = lasso(X_weighted, y, grid, opt_threshold);
-  const arma::mat beta = betahats.each_row() / weights;
+  const arma::mat beta = betahats.each_col() / weights;
   return betahats;
 }
 
@@ -940,7 +940,7 @@ arma::mat partial_lasso_weighted(const arma::mat& X, const arma::colvec& y,
                                             const arma::uvec& H, const bool& partial, 
                                             const arma::vec& weights, const arma::vec& grid,
                                             const double& opt_threshold){ //identical to partial_lasso(), except it calls lasso_weighted() in place of lasso().
-  const unsigned int T_=X.n_rows;
+  const unsigned int T_ = X.n_rows;
   const unsigned int N = X.n_cols;
   const unsigned int gridsize = grid.n_elem;
   const unsigned int h = H.n_elem;
@@ -953,11 +953,11 @@ arma::mat partial_lasso_weighted(const arma::mat& X, const arma::colvec& y,
     minusH.shed_rows(H);
     const arma::mat &X_2 = X.cols(minusH.col(0));
     const arma::mat X1X1inv = inv_sympd(X_1.t() * X_1);
-    const arma::mat M_X1 = eye(T_,T_) - X_1 * X1X1inv * X_1.t();
-    bhats = lasso_weighted(M_X1 * X_2, M_X1 * y, grid, weights, opt_threshold);
+    const arma::mat M_X1 = eye(T_, T_) - X_1 * X1X1inv * X_1.t();
+    bhats = lasso_weighted(M_X1 * X_2, M_X1 * y, grid, weights.elem(minusH.col(0)), opt_threshold);
     for(unsigned int i = 0; i < gridsize; i++) {
-      betahats.submat(H, uvec(i)) = X1X1inv * X_1.t() * (y - X_2* bhats.col(i));
-      betahats.submat(minusH.col(0), uvec(i)) = bhats.col(i);
+      betahats.elem(H + N * i) = X1X1inv * X_1.t() * (y - X_2 * bhats.col(i));
+      betahats.elem(minusH.col(0) + N * i) = bhats.col(i);
     }
   } else {
     betahats = lasso_weighted(X, y, grid, weights, opt_threshold);
@@ -971,7 +971,6 @@ VAR_select_out selectTF(const arma::mat& Y, const arma::mat& lags, const int& p,
   // c constant for plug-in approach. Paper says to take 1.1 but we can play around with it
   // K is the number of iterations of the plug-in approach. Paper says 15.
 
-  
 //  const unsigned int& N = VAR_lags.n_cols; // N is number of predictor variables (pxd in VAR)
   const unsigned int T_ = Y.n_rows; // number of time points
   const unsigned int N = Y.n_cols; // number of seris
@@ -981,7 +980,7 @@ VAR_select_out selectTF(const arma::mat& Y, const arma::mat& lags, const int& p,
   const double gaussian_quantile = R::qnorm(1 - gamma_n / double(2.0 * pow(N, 2) * p), 0, 1, true, false);
   // const double gaussian_quantile = stdnormal_inv(1 - gamma_n / double(2.0 * pow(N, 2) * p));
   const arma::vec lambda_star = {c * gaussian_quantile / sqrt(double(T_))};
-  
+
   arma::mat out_resid(T_, N);
   arma::mat out_coef(p*N, N);
   
@@ -989,7 +988,7 @@ VAR_select_out selectTF(const arma::mat& Y, const arma::mat& lags, const int& p,
   const arma::mat Z = lags.each_row() - mean(lags, 0);
   
   const arma::mat Z_sq = pow(Z,2);
-  
+
   bool partial = true;
   arma::uvec H;
   arma::vec y(T_), v(N), e(T_);
@@ -1008,11 +1007,11 @@ VAR_select_out selectTF(const arma::mat& Y, const arma::mat& lags, const int& p,
     }
     e = y;
     for (unsigned int it = 0; it <= K; it++) { // this loop should be done K+1 times, because it includes the initial setup
-      v = sqrt(mean(Z_sq.each_col() % pow(e, 2), 0));
+      v = sqrt(mean(Z_sq.each_col() % pow(e, 2), 0).t());
       beta = partial_lasso_weighted(Z, y, H, partial, v, lambda_star, eps);
       e = y - Z * beta;
     }
-      
+
     out_resid.col(i) = e;
     out_coef.col(i) = beta;
   }

@@ -7,6 +7,7 @@ library(sparseVARboot)
 setwd(this.path::here())
 setwd("../sparseVARboot")
 devtools::load_all()
+
 setwd(this.path::here())
 
 # DGP 2

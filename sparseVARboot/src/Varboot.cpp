@@ -611,7 +611,7 @@ VAR_out_plus VAR_estimation(const arma::mat& xd, const int& p, const int& penali
                             const double& alpha) {
   VAR_out out;
   VAR_out_plus out2;
-  
+
   if (penalization == 0){
     out = VAR(xd, p);
   } else if (penalization == 1){
@@ -621,7 +621,7 @@ VAR_out_plus VAR_estimation(const arma::mat& xd, const int& p, const int& penali
     out = sparseVAR(xd, p, false, 2, nbr_lambdas, lambda_ratio, eps, selection, 
                     pen_own, only_lag1, c, K, improvement_thresh, Nsim, alpha);
   }
-  
+
   out2.coef_pre = out.coef;
   VAR_root_bound(out);
   out2.coef_post = out.coef;
@@ -686,13 +686,12 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
   }
 
   l_int = round(pars.l);
-  
   if (boot == 1 | boot == 2 | boot == 6) {
     if (penalization != -1) {
       out_boot.par = pars.p;
       out = VAR_estimation(xd, pars.p, penalization, nbr_lambdas, lambda_ratio, selection,
                            eps, pen_own, only_lag1, c, K, improvement_thresh, Nsim, alpha);
-   
+
       ////////////////////remove
       out_boot.coef_pre = out.coef_pre;
       out_boot.coef_post = out.coef_post;
@@ -705,7 +704,7 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
       out_boot.coef_post = oracle_A;
     }
   }
-  
+
   arma::cube means_boot(N, 2, B);
   arma::cube x_boot(T, N, B);
   
@@ -751,7 +750,7 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
                                   x_boot, prog);
     RcppParallel::parallelFor(0, B, boot_sample_x);
   }
-  
+
   arma::vec max_boot_means = means_boot.subcube(0, 0, 0, 0, 0, B - 1); //step 9 in the bootstrap algorithm
   out_boot.means_boot = means_boot;
   arma::vec qu = quantile(max_boot_means, q);
