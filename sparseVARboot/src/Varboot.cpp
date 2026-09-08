@@ -127,7 +127,7 @@ VAR_out_plus VAR_residuals(const arma::mat& y, const VAR_out_plus& V, const doub
     const unsigned int k = A.n_cols;
     const unsigned int p = A.n_rows / k;
     arma::mat lags_y = lag_matrix(y, p, false);
-    W.resid = y - lags_y * A.t();
+    W.resid = y - lags_y * A;
   }
   return W;
 }
@@ -713,11 +713,13 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
   //////////////////////
   
   progress prog(B, show_progress);
-  if (boot == 1) {//
+  if (boot == 1) {
+//    std::cout << "check1" << std::endl;
     const arma::mat z = custom_rnorm(T, B, 0, 1); //step 6 of the bootstrap algorithm
     boot_sample_VAR_SWB boot_sample_x(out.resid, z, out.coef_post, smeans, abs_val, standardize,
                                        init, means_boot, x_boot, prog);
     RcppParallel::parallelFor(0, B, boot_sample_x);
+//    std::cout << "check2" << std::endl;
   } else if (boot == 2){
     const arma::umat i = custom_sample(T, B, T);
     boot_sample_VAR_SB boot_sample_x(out.resid, i, out.coef_post, smeans, abs_val, standardize, 
