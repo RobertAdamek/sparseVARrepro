@@ -18,8 +18,6 @@ type <- 0
 mu <- 0
 # Proportion
 prop <- 1
-# Methods
-boot <- c(boot, "VAR-oracle")
 
 pars <- expand.grid(mean = mu, prop = prop, n = n, N = N, DGP = type)
 reject <- simulations(pars = pars, boot = boot, mu0 = mu0, sim = sim, B = B, level = level, p = 0, l = 0, 

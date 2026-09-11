@@ -16,7 +16,7 @@ boot <- c("VAR-L1-unpen-own-BIC",
           "VAR-GP-unpen-own-BIC",
           "VAR-GP-unpen-own-TF-11")
 # parallel
-parallel_sims <- FALSE
+parallel_sims <- TRUE
 # test statistic is absolute value
 abs_val = TRUE
 # naive standardization
