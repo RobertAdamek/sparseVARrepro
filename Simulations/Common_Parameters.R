@@ -1,6 +1,6 @@
 # Sample sizes
-n <- c(50, 100, 200, 500) 
-N <- c(20, 40, 100, 200)
+n <- c(50, 100) # c(50, 100, 200, 500) 
+N <- c(20, 40) # c(20, 40, 100, 200)
 # Simulations
 sim <- 1000
 # Bootstrap replications
