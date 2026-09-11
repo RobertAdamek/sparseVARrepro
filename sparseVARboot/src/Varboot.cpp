@@ -120,18 +120,6 @@ VAR_out VAR(const arma::mat& y, const int& p, const bool& intercept = false) {
   return out;
 }
 
-VAR_out_plus VAR_residuals(const arma::mat& y, const VAR_out_plus& V, const double& tol = 1e-6) {
-  VAR_out_plus W = V;
-  if (norm(V.coef_post - V.coef_pre) > tol) {
-    const arma::mat A = V.coef_post;
-    const unsigned int k = A.n_cols;
-    const unsigned int p = A.n_rows / k;
-    arma::mat lags_y = lag_matrix(y, p, false);
-    W.resid = y - lags_y * A;
-  }
-  return W;
-}
-
 arma::sp_mat companion_form(const arma::mat A) {
   const unsigned int k = A.n_cols;
   const unsigned int p = A.n_rows / k;
@@ -143,10 +131,10 @@ arma::sp_mat companion_form(const arma::mat A) {
   return B;
 }
 
-void VAR_root_bound(VAR_out& V, const double& max_EV = 0.999) {
+void VAR_root_bound(VAR_out& V, const arma::mat& y, const double& max_EV = 0.999) {
   const arma::sp_mat A = companion_form(V.coef);
-  const unsigned int k = A.n_cols;
-  const unsigned int p = A.n_rows / k;
+  const unsigned int k = V.coef.n_cols;
+  const unsigned int p = V.coef.n_rows / k;
   eigs_opts opts;
   arma::cx_vec eigval = eig_gen(arma::mat(A));
   const arma::vec A_EV = abs(eigval);
@@ -155,6 +143,8 @@ void VAR_root_bound(VAR_out& V, const double& max_EV = 0.999) {
     for (int i = 0; i < p; i++) {
       V.coef.rows(i * k, (i + 1) * k - 1) *= pow(M, i + 1);
     }
+    arma::mat lags_y = lag_matrix(y, p, false);
+    V.resid = y - lags_y * V.coef;
   }
 }
 
@@ -622,12 +612,11 @@ VAR_out_plus VAR_estimation(const arma::mat& xd, const int& p, const int& penali
   }
 
   out2.coef_pre = out.coef;
-  VAR_root_bound(out);
+  VAR_root_bound(out, xd);
   out2.coef_post = out.coef;
   out2.lambda = out.lambda;
   out2.lambdas = out.lambdas;
   out2.resid = out.resid;
-  out2 = VAR_residuals(xd, out2);
   return out2;
 }
 
