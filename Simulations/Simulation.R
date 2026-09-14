@@ -1,7 +1,7 @@
 simulations <- function(pars, boot, mu0 = 0, sim = 1000, B = 199, level = 0.95, p = 0, l = 0, 
                         abs_val = TRUE, standardize = FALSE, parallel_sims = TRUE) {
   parsnames <- paste0("(DGP ", pars$DGP, ", N = ", pars$N, ", n = ", pars$n, 
-                      ", N_mu = ", ceiling(pars$prop * pars$N), ", mu = ", pars$mean, 
+                      ", prop = ", pars$prop, ", mu = ", pars$mean, 
                       ")")
   
   reject <- array(dim = c(nrow(pars), length(boot), length(level)))
