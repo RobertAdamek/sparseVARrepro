@@ -254,7 +254,10 @@ arma::mat sim_mvn_chol(const arma::mat& Sigma, const unsigned int& T) {
 
 arma::cube sim_cube_norm(const arma::mat& Sigma, const unsigned int& T, const unsigned int& B) {
   unsigned int N = Sigma.n_rows;
-  const arma::sp_mat Sigma_sqrt = sp_mat(chol(Sigma));
+  arma::mat M(N, N);
+  arma::vec l(N);
+  eig_sym(l, M, Sigma);
+  const arma::mat Sigma_sqrt = M * diagmat(l);
   const arma::mat Z = custom_rnorm(T, N * B);
   arma::cube Y(T, N, B);
   for (unsigned int b = 0; b < B; b++) {
@@ -636,16 +639,15 @@ arma::mat lr_covmat(const VAR_out_plus& V) {
 }
 
 boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot, 
-                          const int& p, const int& l, 
-                          const bool& abs_val, const bool& standardize, 
-                          const arma::vec& q, const int& B, const arma::mat& init, 
-                          const bool& show_progress, const int& penalization, 
-                          const double& nbr_lambdas, const double& lambda_ratio, 
-                          const int& selection, const double& eps, const bool& pen_own, 
-                          const bool& only_lag1, const double& c, 
-                          const unsigned int& K, const double& improvement_thresh, const unsigned int& Nsim, 
-                          const double& alpha,
-                          const arma::mat& oracle_A, const arma::mat& oracle_u) {
+                    const int& p, const int& l, 
+                    const bool& abs_val, const bool& standardize, 
+                    const arma::vec& q, const int& B, const arma::mat& init, 
+                    const bool& show_progress, const int& penalization, 
+                    const double& nbr_lambdas, const double& lambda_ratio, 
+                    const int& selection, const double& eps, const bool& pen_own, 
+                    const bool& only_lag1, const double& c, 
+                    const unsigned int& K, const double& improvement_thresh, const unsigned int& Nsim, 
+                    const double& alpha, const arma::mat& oracle_A, const arma::mat& oracle_u) {
   // x: this is the raw data, once demeaned we call it xd
   // penalization: integer, 0 (no penalization), 1 (L1), 2 (HLag)
   // nbr_lambdas : double, number of sparsity parameters to consider in grid (for simplicity set as double)
@@ -703,7 +705,6 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
   
   progress prog(B, show_progress);
   if (boot == 1) {
-//    std::cout << "check1" << std::endl;
     const arma::mat z = custom_rnorm(T, B, 0, 1); //step 6 of the bootstrap algorithm
     boot_sample_VAR_SWB boot_sample_x(out.resid, z, out.coef_post, smeans, abs_val, standardize,
                                        init, means_boot, x_boot, prog);

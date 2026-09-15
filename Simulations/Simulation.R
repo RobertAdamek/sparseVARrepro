@@ -104,7 +104,6 @@ simulate_boot_all_methods <- function(seed, pars, mu0, boot, B, level, p = 0, l 
     } else {
       boot_method <- 3*(boot[b] == "BWB") + 4*(boot[b] == "MBB") + 5*(boot[b] == "DWB")
     }
-    
     out <- boot_means(x = x, oracle_A = sD$A, oracle_u = sD$u, mu0 = mu0, boot = boot_method, penalization = pen, p = p, l = l, 
                       abs_val = abs_val, standardize = standardize,
                       B = B, q = level, selection = selection, show_progress = FALSE, n_cores = n_cores,

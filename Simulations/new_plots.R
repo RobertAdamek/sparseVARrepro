@@ -60,5 +60,5 @@ for (dgp in dgps) {
         size_power == "Size" ~ scale_y_continuous(limits = c(0, 0.2))
       )
     )
-  ggsave(paste0(dgp, "_size_power.pdf"), width = 16, height = 4 * length(unique(table$N)))
+  ggsave(paste0("../Results/", dgp, "_size_power.pdf"), width = 16, height = 4 * length(unique(table$N)))
 }
