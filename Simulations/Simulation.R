@@ -10,6 +10,9 @@ simulations <- function(pars, boot, mu0 = 0, sim = 1000, B = 199, level = 0.95, 
   tuning <- array(dim = c(nrow(pars), length(boot), sim))
   dimnames(tuning) <- list(pars = parsnames, boot = boot, sim = 1:sim)
   
+  timing <- array(dim = c(nrow(pars), length(boot), sim))
+  dimnames(timing) <- list(pars = parsnames, boot = boot, sim = 1:sim)
+
   seeds <- sample.int(2^20, size = sim)
   
   if (parallel_sims) {
@@ -34,12 +37,13 @@ simulations <- function(pars, boot, mu0 = 0, sim = 1000, B = 199, level = 0.95, 
     }
     reject[i, , ] <- apply(sapply(out, function(x){x$reject}, simplify = "array"), 1:2, mean)
     tuning[i, , ] <- sapply(out, function(x){x$tuning}, simplify = "array")
+    timing[i, , ] <- sapply(out, function(x){x$timing}, simplify = "array")
   }
   
   if (parallel_sims) {
     parallel::stopCluster(cl)
   }
-  return(reject)
+  return(list(reject = reject, tuning = tuning, timing = timing))
 }
 
 simulate_boot_all_methods <- function(seed, pars, mu0, boot, B, level, p = 0, l = 0,
@@ -52,6 +56,7 @@ simulate_boot_all_methods <- function(seed, pars, mu0, boot, B, level, p = 0, l 
     n_cores <- NULL
   }
   reject <- array(dim = c(length(boot), length(level)))
+  timing <- rep(NA, length(boot))
   dimnames(reject) <- list(boot = boot, level = 1 - level)
   
   tuning <- rep(NA, length(boot))
@@ -104,37 +109,17 @@ simulate_boot_all_methods <- function(seed, pars, mu0, boot, B, level, p = 0, l 
     } else {
       boot_method <- 3*(boot[b] == "BWB") + 4*(boot[b] == "MBB") + 5*(boot[b] == "DWB")
     }
+    start <- Sys.time()
     out <- boot_means(x = x, oracle_A = sD$A, oracle_u = sD$u, mu0 = mu0, boot = boot_method, penalization = pen, p = p, l = l, 
                       abs_val = abs_val, standardize = standardize,
                       B = B, q = level, selection = selection, show_progress = FALSE, n_cores = n_cores,
                       pen_own = pen_own, only_lag1 = only_lag1, c = PI_c, 
                       K = 15, improvement_thresh = 0.01, Nsim = 1000, alpha = 0.05)
-    
-    ####################remove
-    coef_pre[[b]] <- out$coef_pre
-    coef_post[[b]] <- out$coef_post
-    if (length(out$lambda) > 0){
-      lambdas[b] <- out$lambda
-    }
-    if (length(out$lambdas) > 0){
-      lambdass[[b]] <- out$lambdas
-    }
-    ##########################
+    stop <- Sys.time()
+    timing[b] <- difftime(start, stop, units = "secs")
     
     reject[b, ] <- out$mean > out$boot_quantiles
     tuning[b] <- out$par
   }
-  return(list(reject = reject, tuning = tuning
-              ###################remove
-              , details = list(
-                  coef_pre = coef_pre, 
-                  coef_post = coef_post,
-                  lambda = lambdas, 
-                  lambdas = lambdass, 
-                  boot_quantiles = out$boot_quantiles, 
-                  statistic = out$mean, 
-                  smeans = out$smeans,
-                  x = x)
-              ###########################
-              ))
+  return(list(reject = reject, tuning = tuning, timing = timing))
 }

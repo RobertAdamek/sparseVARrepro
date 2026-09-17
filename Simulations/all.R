@@ -1,14 +1,14 @@
 # install package
-# setwd(this.path::here())
-# install.packages("../sparseVARboot_0.5.0.tar.gz", type = "local")
+setwd(this.path::here())
+install.packages("../sparseVARboot_0.5.0.tar.gz", type = "local")
 library(sparseVARboot)
 
 # But for us, if we want to change things, the following way is easier
-setwd(this.path::here())
-setwd("../sparseVARboot")
-devtools::load_all()
-
-setwd(this.path::here())
+# Note, this does not work for parallel computing. Then we really need to install the package. 
+# setwd(this.path::here())
+# setwd("../sparseVARboot")
+# devtools::load_all()
+# setwd(this.path::here())
 
 # DGP 2
 source("dgp2_size.R")

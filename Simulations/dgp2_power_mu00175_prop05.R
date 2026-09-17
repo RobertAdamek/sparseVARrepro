@@ -22,7 +22,10 @@ prop <- 0.5
 boot <- c(boot, "VAR-oracle")
 
 pars <- expand.grid(mean = mu, prop = prop, n = n, N = N, DGP = type)
-reject <- simulations(pars = pars, boot = boot, mu0 = mu0, sim = sim, B = B, level = level, p = 0, l = 0, 
-                      abs_val = abs_val, standardize = standardize, parallel_sims = parallel_sims)
+out <- simulations(pars = pars, boot = boot, mu0 = mu0, sim = sim, B = B, level = level, p = 0, l = 0, 
+                   abs_val = abs_val, standardize = standardize, parallel_sims = parallel_sims)
+reject <- out$reject
+tuning <- out$tuning
+timing <- out$timing
 
-save(reject, file = "../Results/dgp2_power_mu00175_prop05.RData")
+save(reject, tuning, timing, file = "../Results/dgp2_power_mu00175_prop05.RData")
