@@ -8,12 +8,8 @@ data <- read_xlsx("pwt110.xlsx", sheet = 3)
 
 countries <- unique(data$countrycode)
 years <- unique(data$year)
-real_gdp <- matrix(data$rgdpna, ncol = length(countries), 
+real_gdp <- matrix(data$rgdpna, ncol = length(countries),
                    dimnames = list(year = years, countries = countries))
-
-#library(bootUR)
-
-#bootUR::plot_missing_values(real_gdp)
 
 real_gdp_clean <- real_gdp[-(1:20), ]
 nT <- nrow(real_gdp_clean)
@@ -34,39 +30,43 @@ load("PWT_gdpgrowth.RData")
 
 source("StepM.R")
 names_units <- country_key[, 1]
-boot_vec <- c("VAR-TF", #"VAR-EB", 
-              "BWB", "MBB", "MB", "EB")
+boot_vec <- c("VAR-MB", "VAR-EB", "VAR-GP",
+              "BWB", "MBB", "DWB",
+              "MB", "EB")
+palette <- c("#097e50", "#66a61e", "#bff542",
+             "#a54043", "#e5694a", "#f5a742",
+             "#464b92", "#698fb2")
+
 
 set.seed(13682)
-test_mu1 <- StepM(x = gdp_growth, names_units = names_units, mu0 = 1, boot = boot_vec)
-test_mu2 <- StepM(x = gdp_growth, names_units = names_units, mu0 = 2, boot = boot_vec)
+mu = 0 # set the null hypothesis
+abs_val = FALSE # set one-tailed vs two-tailed
+standardize = FALSE # standardize test statistic
+test <- StepM(x = gdp_growth, names_units = names_units, mu0 = mu, boot = boot_vec, abs_val = abs_val, standardize = standardize)
 
-save(test_mu1, test_mu2, file = "PWT_gdp_tests.RData")
+save(test, file = "PWT_gdp_tests.RData")
 
 load("PWT_gdp_tests.RData")
 
-pval1 <- reshape2::melt(test_mu1$p_val[, -2], id.vars = "unit")
-pval2 <- reshape2::melt(test_mu2$p_val[, -2], id.vars = "unit")
-colnames(pval2) <- c("Country", "Bootstrap", "Pvalue")
-pval2$Country <- factor(rep(1:nN, length(boot_vec)), labels = test_mu2$p_val[, 1])
-pval2$index <- as.numeric(pval2$Country)
-test_mu2$details$`VAR-MB`$coef_pre
+pval <- reshape2::melt(test$p_val[, -2], id.vars = "unit")
+colnames(pval) <- c("Country", "Bootstrap", "Pvalue")
+pval$Country <- factor(rep(1:nN, length(boot_vec)), labels = test$p_val[, 1])
+pval$index <- as.numeric(pval$Country)
+test$details$`VAR-MB`$coef_pre
+test$timing
 
 
 library(ggplot2)
 
-pvalsub <- pval2[pval2$Country %in% pval2$Country[1:20], ]
+pvalsub <- pval[pval$Country %in% pval$Country[1:20], ]
 
-#palette <- c("#097e50", "#66a61e", "#a54043", "#e5694a", "#464b92", "#698fb2")
-palette <- c("#395289","#5dc661","#fbe723", "#f9775d", "#b83779")
-
-ggplot(pvalsub, 
+ggplot(pvalsub,
        aes(x = Country, y = Pvalue, fill = Bootstrap)) +
-  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0.05, ymax = 0.1), 
+  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0.05, ymax = 0.1),
             fill = "grey90", alpha = 1) +
-  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0.01, ymax = 0.05), 
+  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0.01, ymax = 0.05),
             fill = "grey95", alpha = 1) +
-  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = 0.01), 
+  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = 0.01),
             fill = "grey90", alpha = 1) +
   geom_hline(yintercept = 0.1, colour = "grey70") +
   geom_hline(yintercept = 0.05, colour = "grey70") +
@@ -74,11 +74,11 @@ ggplot(pvalsub,
   geom_hline(yintercept = 0, colour = "grey70") +
   geom_col(position = "dodge") +
   scale_fill_manual(values = palette) +
-  coord_cartesian(ylim = c(0, 0.12)) +
+  coord_cartesian(ylim = c(0, 0.2)) +
   scale_x_discrete(guide = guide_axis(angle = 45)) +
   scale_y_continuous(name = "p-value", breaks = c(0.01, 0.05, 0.1),
                      expand = expansion(mult = c(0, 0))) +
-  guides(fill = guide_legend(nrow = 1, byrow = TRUE)) + 
+  guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +
   theme(legend.position = "bottom",
         panel.background = element_rect(fill = "grey95"),
         plot.background =  element_rect(fill = "transparent"),
@@ -90,5 +90,6 @@ ggplot(pvalsub,
         legend.title = element_blank(),
         legend.text = element_text(size = rel(1.2)),
         legend.key = element_blank())
+        #+ ggtitle(paste0("mu_0=",mu,", ",ifelse(standardize, "Standardized", "Non-standardized")))
 
 ggsave("pval_gdp.pdf", width = 8, height = 4)

@@ -71,18 +71,23 @@ StepM <- function(x, names_units = NULL, mu0 = 0, boot = 1, p = 0, l = 0,
   nN <- ncol(x)
   method_details <- vector(mode = "list", length = length(boot))
   names(method_details) <- boot
+  timing <- 1:length(boot)
+  names(timing) <- boot
   for (b in 1:length(boot)) {
-    boot_method <- 1*(boot[b] == "VAR-MB") + 2*(boot[b] == "VAR-EB") + 
-      4*(boot[b] == "MBB") + 3*(boot[b] == "BWB") + 3*(boot[b] == "MB") + 4*(boot[b] == "EB")
+    boot_method <- 1*(boot[b] == "VAR-MB") + 2*(boot[b] == "VAR-EB") +
+      4*(boot[b] == "MBB") + 3*(boot[b] == "BWB") + 3*(boot[b] == "MB") + 4*(boot[b] == "EB") + 5*(boot[b] == "DWB") + 6*(boot[b] == "VAR-GP")
     if (boot[b] %in% c("MB", "RB")) {
       l <- 1
     }
-    out <- boot_means_clean(x = x, mu0 = mu0, boot = boot_method, p = p, l = l,
-                          abs_val = abs_val, standardize = standardize, q = q, B = B,
-                          show_progress = show_progress, penalization = penalization,
-                          selection = selection, c = c, pen_own = pen_own, only_lag1 = only_lag1)
+    start <- Sys.time()
+    out <- boot_means(x = x, mu0 = mu0, boot = boot_method, p = p, l = l,
+                      abs_val = abs_val, standardize = standardize, q = q, B = B,
+                      show_progress = show_progress, penalization = penalization,
+                      selection = selection, c = c, pen_own = pen_own, only_lag1 = only_lag1)
+    end <- Sys.time()
+    timing[b] <- end - start
     method_details[[b]] <- out
-  
+
     i <- 1 + out$smeans[, 2]
     t_r <- out$smeans[, 1]
     t_b <- sapply(1:B, function(b){
@@ -90,21 +95,21 @@ StepM <- function(x, names_units = NULL, mu0 = 0, boot = 1, p = 0, l = 0,
       tm[1 + out$means_boot[, 2, b]] <- out$means_boot[, 1, b]
       return(tm)
     })
-    
+
     max_t_r_b <- sapply(1:B, function(b){
       rev(cummax(t_b[rev(i), b]))
     })
     p_init <- sapply(1:nN, function(r){
       (sum(max_t_r_b[r, ] >= t_r[r]) + 1) / (B + 1)
     })
-    
+
     p_adj <- cummax(p_init)
     if (b == 1){
-      p_val <- data.frame(unit = names_units[i], 
+      p_val <- data.frame(unit = names_units[i],
                           mean_growth = colMeans(x)[i])
     }
     p_val[[boot[b]]] <- p_adj
   }
-  return(list(p_val = p_val, details = method_details))
+  return(list(p_val = p_val, details = method_details, timing = timing))
 }
 
