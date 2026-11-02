@@ -26,6 +26,11 @@ extract_pars <- function(x) {
   return(c(sp = sp, N = N, n = n))
 }
 
+method_colors <- c("VAR-BIC" = "steelblue1", "VAR-TF"="steelblue",     
+                   "MBB" = "sienna1", "BWB" = "sienna3", "DWB"="sienna4",
+                   "GPI-BIC" = "springgreen3", "GPI-TF" = "springgreen4",
+                   "VAR-oracle" = "purple4")
+
 for (dgp in dgps) {
   results <- sim_result_files[substr(sim_result_files, 1, 4) == dgp & grepl(".RData", sim_result_files)]
   nr_results <- length(results)
@@ -49,7 +54,8 @@ for (dgp in dgps) {
   
   ggplot(df, aes(x = T, y = `Rejection Frequency`, fill = Method)) +
     geom_col(position = "dodge") +
-    scale_fill_brewer(palette = "Paired") +
+    #scale_fill_brewer(palette = "Paired") +
+    scale_fill_manual(values = method_colors)+
     facet_grid(vars(size_power), vars(N), scales = "free_y") +
     theme(legend.position = "bottom") +
     geom_hline(data = data.frame(size = level, size_power = factor("Size", levels = unique(df$size_power))),
