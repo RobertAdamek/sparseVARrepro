@@ -13,6 +13,9 @@ boot_means <- function(x, oracle_A = diag(1), oracle_u = diag(1), mu0 = 0, boot 
   if (is.null(n_cores)) {
     n_cores <- parallelly::availableCores(omit = 2)
   }
+  if(length(mu0) == 1){
+    mu0 <- rep(mu0, ncol(x))
+  }
   RcppParallel::setThreadOptions(numThreads = n_cores)
 
   boot_means_R(x, oracle_A, oracle_u, mu0, boot, p, l, abs_val, standardize, q, B, show_progress,

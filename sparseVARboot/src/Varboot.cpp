@@ -643,7 +643,7 @@ arma::mat lr_covmat(const VAR_out_plus& V) {
   return lrv;
 }
 
-boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
+boot_out boot_means(const arma::mat& x, const arma::vec& mu0, const int& boot,
                     const int& p, const int& l,
                     const bool& abs_val, const bool& standardize,
                     const arma::vec& q, const int& B, const arma::mat& init,
@@ -702,7 +702,7 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
   arma::cube x_boot(T, N, B);
 
   // this part needs to look at the original data to compute the statistic
-  arma::mat smeans = sorted_stats(x - mu0, abs_val, standardize); //step 1 in the bootstrap algorithm
+  arma::mat smeans = sorted_stats(x.each_row() - mu0.t(), abs_val, standardize); //step 1 in the bootstrap algorithm
   ////////////////////remove
   out_boot.smeans = smeans;
   //////////////////////
@@ -756,8 +756,8 @@ boot_out boot_means(const arma::mat& x, const double& mu0, const int& boot,
 
 // [[Rcpp::export]]
 Rcpp::List boot_means_R(const arma::mat& x,
-                        const arma::mat& oracle_A = zeros(1), const arma::mat& oracle_u = zeros(1),
-                        const double& mu0 = 0, const int& boot = 1, const int& p = 1,
+                        const arma::mat& oracle_A, const arma::mat& oracle_u,
+                        const arma::vec& mu0, const int& boot = 1, const int& p = 1,
                         const double& l = 1, const bool& abs_val = true, const bool& standardize = false,
                         const arma::vec& q = 0.95 * ones(1), const int& B = 9999,
                         const bool& show_progress = false, const int& penalization = 1,

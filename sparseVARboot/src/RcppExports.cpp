@@ -67,7 +67,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // boot_means_R
-Rcpp::List boot_means_R(const arma::mat& x, const arma::mat& oracle_A, const arma::mat& oracle_u, const double& mu0, const int& boot, const int& p, const double& l, const bool& abs_val, const bool& standardize, const arma::vec& q, const int& B, const bool& show_progress, const int& penalization, const double& nbr_lambdas, const double& lambda_ratio, const int& selection, const double& eps, const bool& pen_own, const bool& only_lag1, const double& c, const unsigned int& K, const double& improvement_thresh, const unsigned int& Nsim, const double& alpha);
+Rcpp::List boot_means_R(const arma::mat& x, const arma::mat& oracle_A, const arma::mat& oracle_u, const arma::vec& mu0, const int& boot, const int& p, const double& l, const bool& abs_val, const bool& standardize, const arma::vec& q, const int& B, const bool& show_progress, const int& penalization, const double& nbr_lambdas, const double& lambda_ratio, const int& selection, const double& eps, const bool& pen_own, const bool& only_lag1, const double& c, const unsigned int& K, const double& improvement_thresh, const unsigned int& Nsim, const double& alpha);
 RcppExport SEXP _sparseVARboot_boot_means_R(SEXP xSEXP, SEXP oracle_ASEXP, SEXP oracle_uSEXP, SEXP mu0SEXP, SEXP bootSEXP, SEXP pSEXP, SEXP lSEXP, SEXP abs_valSEXP, SEXP standardizeSEXP, SEXP qSEXP, SEXP BSEXP, SEXP show_progressSEXP, SEXP penalizationSEXP, SEXP nbr_lambdasSEXP, SEXP lambda_ratioSEXP, SEXP selectionSEXP, SEXP epsSEXP, SEXP pen_ownSEXP, SEXP only_lag1SEXP, SEXP cSEXP, SEXP KSEXP, SEXP improvement_threshSEXP, SEXP NsimSEXP, SEXP alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -75,7 +75,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type oracle_A(oracle_ASEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type oracle_u(oracle_uSEXP);
-    Rcpp::traits::input_parameter< const double& >::type mu0(mu0SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type mu0(mu0SEXP);
     Rcpp::traits::input_parameter< const int& >::type boot(bootSEXP);
     Rcpp::traits::input_parameter< const int& >::type p(pSEXP);
     Rcpp::traits::input_parameter< const double& >::type l(lSEXP);

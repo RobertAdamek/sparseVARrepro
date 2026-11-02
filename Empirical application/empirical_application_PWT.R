@@ -33,16 +33,19 @@ names_units <- country_key[, 1]
 boot_vec <- c("VAR-MB", "VAR-EB", "VAR-GP",
               "BWB", "MBB", "DWB",
               "MB", "EB")
-palette <- c("#097e50", "#66a61e", "#bff542",
-             "#a54043", "#e5694a", "#f5a742",
-             "#464b92", "#698fb2")
+palette <- c("VAR-MB"="steelblue", "VAR-EB"="turquoise3", "VAR-GP"="springgreen4",
+             "MBB"="sienna1", "BWB"="sienna3",  "DWB"="sienna4",
+             "MB"="violetred", "EB"="violetred4")
 
 
 set.seed(13682)
-mu = 0 # set the null hypothesis
+mu = 2 # set the null hypothesis
 abs_val = FALSE # set one-tailed vs two-tailed
 standardize = FALSE # standardize test statistic
-test <- StepM(x = gdp_growth, names_units = names_units, mu0 = mu, boot = boot_vec, abs_val = abs_val, standardize = standardize)
+
+#test <- StepM(x = gdp_growth, names_units = names_units, mu0 = mu, boot = boot_vec, abs_val = abs_val, standardize = standardize)
+scaled_data <- scale(gdp_growth, center = FALSE, scale = TRUE)
+test <- StepM(x = scaled_data, names_units = names_units, mu0 = mu/attributes(scaled_data)$"scaled:scale", boot = boot_vec, abs_val = abs_val, standardize = standardize)
 
 save(test, file = "PWT_gdp_tests.RData")
 
@@ -52,7 +55,7 @@ pval <- reshape2::melt(test$p_val[, -2], id.vars = "unit")
 colnames(pval) <- c("Country", "Bootstrap", "Pvalue")
 pval$Country <- factor(rep(1:nN, length(boot_vec)), labels = test$p_val[, 1])
 pval$index <- as.numeric(pval$Country)
-test$details$`VAR-MB`$coef_pre
+#test$details$`VAR-MB`$coef_pre
 test$timing
 
 
@@ -74,7 +77,7 @@ ggplot(pvalsub,
   geom_hline(yintercept = 0, colour = "grey70") +
   geom_col(position = "dodge") +
   scale_fill_manual(values = palette) +
-  coord_cartesian(ylim = c(0, 0.2)) +
+  coord_cartesian(ylim = c(0, 0.12)) +
   scale_x_discrete(guide = guide_axis(angle = 45)) +
   scale_y_continuous(name = "p-value", breaks = c(0.01, 0.05, 0.1),
                      expand = expansion(mult = c(0, 0))) +
