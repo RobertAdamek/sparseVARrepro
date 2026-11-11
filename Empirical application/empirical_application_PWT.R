@@ -30,10 +30,10 @@ load("PWT_gdpgrowth.RData")
 
 source("StepM.R")
 names_units <- country_key[, 1]
-boot_vec <- c("VAR-MB", "VAR-EB", "VAR-GP",
+boot_vec <- c("VAR-MB", "VAR-EB", #"VAR-GP",
               "BWB", "MBB", "DWB",
               "MB", "EB")
-palette <- c("VAR-MB"="steelblue", "VAR-EB"="turquoise3", "VAR-GP"="springgreen4",
+palette <- c("VAR-MB"="steelblue", "VAR-EB"="turquoise3", #"VAR-GP"="springgreen4",
              "MBB"="sienna1", "BWB"="sienna3",  "DWB"="sienna4",
              "MB"="violetred", "EB"="violetred4")
 
@@ -65,21 +65,30 @@ pvalsub <- pval[pval$Country %in% pval$Country[1:20], ]
 
 ggplot(pvalsub,
        aes(x = Country, y = Pvalue, fill = Bootstrap)) +
+  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0.2, ymax = 0.25),
+            fill = "grey95", alpha = 1) +
+  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0.15, ymax = 0.2),
+            fill = "grey90", alpha = 1) +
+  geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0.1, ymax = 0.15),
+            fill = "grey95", alpha = 1) +
   geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0.05, ymax = 0.1),
             fill = "grey90", alpha = 1) +
   geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0.01, ymax = 0.05),
             fill = "grey95", alpha = 1) +
   geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 0, ymax = 0.01),
             fill = "grey90", alpha = 1) +
+  geom_hline(yintercept = 0.25, colour = "grey70") +
+  geom_hline(yintercept = 0.2, colour = "grey70") +
+  geom_hline(yintercept = 0.15, colour = "grey70") +
   geom_hline(yintercept = 0.1, colour = "grey70") +
   geom_hline(yintercept = 0.05, colour = "grey70") +
   geom_hline(yintercept = 0.01, colour = "grey70") +
   geom_hline(yintercept = 0, colour = "grey70") +
   geom_col(position = "dodge") +
   scale_fill_manual(values = palette) +
-  coord_cartesian(ylim = c(0, 0.12)) +
+  coord_cartesian(ylim = c(0, 0.24)) +
   scale_x_discrete(guide = guide_axis(angle = 45)) +
-  scale_y_continuous(name = "p-value", breaks = c(0.01, 0.05, 0.1),
+  scale_y_continuous(name = "p-value", breaks = c(0.01, 0.05, 0.1, 0.15, 0.2),
                      expand = expansion(mult = c(0, 0))) +
   guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +
   theme(legend.position = "bottom",
