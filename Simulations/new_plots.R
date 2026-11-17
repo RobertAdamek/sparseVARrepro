@@ -4,8 +4,8 @@ library(reshape2)
 setwd(this.path::here())
 
 sim_result_files <- list.files("../Results")
+sim_result_files <- sim_result_files[sim_result_files != "power_curve_results"]
 dgps <- unique(substr(sim_result_files, 1, 4))
-
 level <- 0.05
 
 clean_name<-function(meth){
@@ -51,11 +51,6 @@ for (dgp in dgps) {
   df$N <- factor(df$N, levels = unique(df$N))
   df$T <- factor(df$T, levels = unique(df$T))
   colnames(df)[4:5] <- c("Method", "Rejection Frequency")
-  #if(max(nchar(as.character(df$size_power)))>18){
-  #  y_facet_size <- 9*18/max(nchar(as.character(df$size_power)))
-  #}else{
-  #  y_facet_size <- 9
-  #}
   y_facet_size <- 9*18/max(nchar(as.character(df$size_power)))
   ggplot(df, aes(x = T, y = `Rejection Frequency`, fill = Method)) +
     geom_col(position = "dodge") +

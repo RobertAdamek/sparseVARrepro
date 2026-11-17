@@ -4,6 +4,7 @@ library(reshape2)
 setwd(this.path::here())
 
 sim_result_files <- list.files("../Results")
+sim_result_files <- sim_result_files[sim_result_files!="power_curve_results"]
 dgps <- unique(substr(sim_result_files, 1, 4))
 
 level <- 0.05
@@ -26,10 +27,7 @@ extract_pars <- function(x) {
   return(c(sp = sp, N = N, n = n))
 }
 
-method_colors <- c("VAR-BIC" = "steelblue1", "VAR-TF"="steelblue",
-                   "MBB" = "sienna1", "BWB" = "sienna3", "DWB"="sienna4",
-                   "GPI-BIC" = "springgreen3", "GPI-TF" = "springgreen4",
-                   "VAR-oracle" = "purple4")
+color_switch <- c("VAR-TF" = "steelblue", "GPI-TF" = "springgreen4")
 which_methods_plot <- c("VAR-TF", "GPI-TF")
 for (dgp in dgps) {
   results <- sim_result_files[substr(sim_result_files, 1, 4) == dgp & grepl(".RData", sim_result_files)]
@@ -42,29 +40,32 @@ for (dgp in dgps) {
   colnames(table) <- c("size_power", "N", "T", which_methods_plot)
   for (i in 1:nr_results) {
     load(paste0("../Results/", results[i]))
-    mean_runtimes <- log(-1*apply(timing, c(1,2), mean))
+    mean_runtimes <- -1*apply(timing, c(1,2), mean)
     colnames(mean_runtimes) <- c(methods)
     table[(i - 1) * nr_rows + 1:nr_rows, 3 + 1:length(which_methods_plot)] <- mean_runtimes[,which_methods_plot]
     table[(i - 1) * nr_rows + 1:nr_rows, 1:3] <- extract_pars(rownames(mean_runtimes))
   }
+  table$Relative <- table$`GPI-TF` / table$`VAR-TF`
+  table$`GPI-TF` <- table$`VAR-TF` <- NULL
+  table$which_faster <- ifelse(table$Relative >= 1, "VAR-TF", "GPI-TF")
 
-  df <- melt(table, id.vars = 1:3)
+  df <- melt(table, id.vars = c(1:3, 5))
   df$size_power <- factor(df$size_power, levels = unique(df$size_power))
   df$N <- factor(df$N, levels = unique(df$N))
   df$T <- factor(df$T, levels = unique(df$T))
-  colnames(df)[4:5] <- c("Method", "Runtime")
-
-  ggplot(df, aes(x = T, y = Runtime, fill = Method)) +
-    #geom_line() +
-    geom_col(position = "dodge") +
-    #scale_fill_brewer(palette = "Paired") +
-    scale_fill_manual(values = method_colors)+
+  colnames(df)[5:6] <- c("Method", "Runtime")
+  y_facet_size <- 9*18/max(nchar(as.character(df$size_power)))
+  ggplot(df, aes(x = T, y = Runtime, group = 1, colour = which_faster)) +
+    scale_colour_manual(values = color_switch)+
     facet_grid(vars(size_power), vars(N), scales = "free_y") +
-    theme(legend.position = "bottom") +
-    ylab("Mean runtime in log(seconds)")
-    #geom_hline(data = data.frame(size = level, size_power = factor("Size", levels = unique(df$size_power))),
-    #           aes(yintercept = size)) +
-    #scale_y_continuous(limits = c(0, 1)) #+
+    #theme(strip.text.y = element_text(size = y_facet_size)) +
+    #theme(legend.position = "bottom") +
+    #guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +
+    theme(legend.position = "none") +
+    geom_hline(aes(yintercept = 1)) +
+    geom_point() +
+    ylab(expression("Relative runtime  "*over("GPI-TF", "VAR-TF"))) +
+    scale_y_continuous(limits = c(0.9, 1.45))
     #facetted_pos_scales(
     #  y = list(
     #    size_power == "Size" ~ scale_y_continuous(limits = c(0, 0.2))
