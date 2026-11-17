@@ -30,7 +30,7 @@ load("PWT_gdpgrowth.RData")
 
 source("StepM.R")
 names_units <- country_key[, 1]
-boot_vec <- c("VAR-MB", "VAR-EB", #"VAR-GP",
+boot_vec <- c("VAR-MB", #"VAR-EB", #"VAR-GP",
               "BWB", "MBB", "DWB",
               "MB", "EB")
 palette <- c("VAR-MB"="steelblue", "VAR-EB"="turquoise3", #"VAR-GP"="springgreen4",
