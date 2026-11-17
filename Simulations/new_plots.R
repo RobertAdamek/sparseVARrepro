@@ -51,12 +51,17 @@ for (dgp in dgps) {
   df$N <- factor(df$N, levels = unique(df$N))
   df$T <- factor(df$T, levels = unique(df$T))
   colnames(df)[4:5] <- c("Method", "Rejection Frequency")
-
+  #if(max(nchar(as.character(df$size_power)))>18){
+  #  y_facet_size <- 9*18/max(nchar(as.character(df$size_power)))
+  #}else{
+  #  y_facet_size <- 9
+  #}
+  y_facet_size <- 9*18/max(nchar(as.character(df$size_power)))
   ggplot(df, aes(x = T, y = `Rejection Frequency`, fill = Method)) +
     geom_col(position = "dodge") +
-    #scale_fill_brewer(palette = "Paired") +
     scale_fill_manual(values = method_colors)+
     facet_grid(vars(size_power), vars(N), scales = "free_y") +
+    theme(strip.text.y = element_text(size = y_facet_size)) +
     theme(legend.position = "bottom") +
     geom_hline(data = data.frame(size = level, size_power = factor("Size", levels = unique(df$size_power))),
       aes(yintercept = size)) +
