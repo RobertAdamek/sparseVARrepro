@@ -26,7 +26,7 @@ extract_pars <- function(x) {
   return(c(sp = sp, N = N, n = n))
 }
 
-method_colors <- c("VAR-BIC" = "steelblue1", "VAR-TF"="steelblue",     
+method_colors <- c("VAR-BIC" = "steelblue1", "VAR-TF"="steelblue",
                    "MBB" = "sienna1", "BWB" = "sienna3", "DWB"="sienna4",
                    "GPI-BIC" = "springgreen3", "GPI-TF" = "springgreen4",
                    "VAR-oracle" = "purple4")
@@ -45,13 +45,13 @@ for (dgp in dgps) {
     table[(i - 1) * nr_rows + 1:nr_rows, 3 + 1:length(methods)] <- reject[, , dimnames(reject)[[3]] == as.character(level)]
     table[(i - 1) * nr_rows + 1:nr_rows, 1:3] <- extract_pars(rownames(reject))
   }
-  
+
   df <- melt(table, id.vars = 1:3)
   df$size_power <- factor(df$size_power, levels = unique(df$size_power))
   df$N <- factor(df$N, levels = unique(df$N))
   df$T <- factor(df$T, levels = unique(df$T))
   colnames(df)[4:5] <- c("Method", "Rejection Frequency")
-  
+
   ggplot(df, aes(x = T, y = `Rejection Frequency`, fill = Method)) +
     geom_col(position = "dodge") +
     #scale_fill_brewer(palette = "Paired") +
@@ -66,5 +66,5 @@ for (dgp in dgps) {
         size_power == "Size" ~ scale_y_continuous(limits = c(0, 0.2))
       )
     )
-  ggsave(paste0("../Results/", dgp, "_size_power.pdf"), width = 16, height = 4 * length(unique(table$N)))
+  ggsave(paste0("../Results/", dgp, "_size_power.pdf"), width = 8, height = 2 * length(unique(table$size_power)))
 }

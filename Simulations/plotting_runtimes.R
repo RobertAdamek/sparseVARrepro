@@ -26,7 +26,7 @@ extract_pars <- function(x) {
   return(c(sp = sp, N = N, n = n))
 }
 
-method_colors <- c("VAR-BIC" = "steelblue1", "VAR-TF"="steelblue",     
+method_colors <- c("VAR-BIC" = "steelblue1", "VAR-TF"="steelblue",
                    "MBB" = "sienna1", "BWB" = "sienna3", "DWB"="sienna4",
                    "GPI-BIC" = "springgreen3", "GPI-TF" = "springgreen4",
                    "VAR-oracle" = "purple4")
@@ -42,18 +42,18 @@ for (dgp in dgps) {
   colnames(table) <- c("size_power", "N", "T", which_methods_plot)
   for (i in 1:nr_results) {
     load(paste0("../Results/", results[i]))
-    median_runtimes <- log(-1*apply(timing, c(1,2), median))
-    colnames(median_runtimes) <- c(methods)
-    table[(i - 1) * nr_rows + 1:nr_rows, 3 + 1:length(which_methods_plot)] <- median_runtimes[,which_methods_plot]
-    table[(i - 1) * nr_rows + 1:nr_rows, 1:3] <- extract_pars(rownames(median_runtimes))
+    mean_runtimes <- log(-1*apply(timing, c(1,2), mean))
+    colnames(mean_runtimes) <- c(methods)
+    table[(i - 1) * nr_rows + 1:nr_rows, 3 + 1:length(which_methods_plot)] <- mean_runtimes[,which_methods_plot]
+    table[(i - 1) * nr_rows + 1:nr_rows, 1:3] <- extract_pars(rownames(mean_runtimes))
   }
-  
+
   df <- melt(table, id.vars = 1:3)
   df$size_power <- factor(df$size_power, levels = unique(df$size_power))
   df$N <- factor(df$N, levels = unique(df$N))
   df$T <- factor(df$T, levels = unique(df$T))
   colnames(df)[4:5] <- c("Method", "Runtime")
-  
+
   ggplot(df, aes(x = T, y = Runtime, fill = Method)) +
     #geom_line() +
     geom_col(position = "dodge") +
@@ -61,7 +61,7 @@ for (dgp in dgps) {
     scale_fill_manual(values = method_colors)+
     facet_grid(vars(size_power), vars(N), scales = "free_y") +
     theme(legend.position = "bottom") +
-    ylab("Median runtime in log(seconds)")
+    ylab("Mean runtime in log(seconds)")
     #geom_hline(data = data.frame(size = level, size_power = factor("Size", levels = unique(df$size_power))),
     #           aes(yintercept = size)) +
     #scale_y_continuous(limits = c(0, 1)) #+
@@ -70,5 +70,5 @@ for (dgp in dgps) {
     #    size_power == "Size" ~ scale_y_continuous(limits = c(0, 0.2))
     #  )
     #)
-  ggsave(paste0("../Results/", dgp, "_runtime.pdf"), width = 16, height = 4 * length(unique(table$N)))
+  ggsave(paste0("../Results/", dgp, "_runtime.pdf"), width = 8, height = 2 * length(unique(table$size_power)))
 }
