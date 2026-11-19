@@ -74,7 +74,7 @@ StepM <- function(x, names_units = NULL, mu0 = 0, boot = 1, p = 0, l = 0,
   timing <- 1:length(boot)
   names(timing) <- boot
   for (b in 1:length(boot)) {
-    boot_method <- 1*(boot[b] == "VAR-MB") + 2*(boot[b] == "VAR-EB") +
+    boot_method <- 1*(boot[b] == "VAR-MB") + 2*(boot[b] == "VAR-EB") + 1*(boot[b] == "VAR-TF") +
       4*(boot[b] == "MBB") + 3*(boot[b] == "BWB") + 3*(boot[b] == "MB") + 4*(boot[b] == "EB") + 5*(boot[b] == "DWB") + 6*(boot[b] == "VAR-GP")
     if (boot[b] %in% c("MB", "RB")) {
       l <- 1
