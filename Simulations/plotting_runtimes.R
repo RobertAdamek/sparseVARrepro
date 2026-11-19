@@ -55,17 +55,17 @@ for (dgp in dgps) {
   df$T <- factor(df$T, levels = unique(df$T))
   colnames(df)[5:6] <- c("Method", "Runtime")
   y_facet_size <- 9*18/max(nchar(as.character(df$size_power)))
-  ggplot(df, aes(x = T, y = Runtime, group = 1, colour = which_faster)) +
-    scale_colour_manual(values = color_switch)+
+  ggplot(df, aes(x = T, y = Runtime - 1, fill = which_faster)) +
+    geom_col(position = "dodge") +
+    scale_fill_manual(values = color_switch)+
     facet_grid(vars(size_power), vars(N), scales = "free_y") +
     #theme(strip.text.y = element_text(size = y_facet_size)) +
     #theme(legend.position = "bottom") +
     #guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +
     theme(legend.position = "none") +
-    geom_hline(aes(yintercept = 1)) +
-    geom_point() +
+    geom_hline(aes(yintercept = 0)) +
     ylab(expression("Relative runtime  "*over("GPI-TF", "VAR-TF"))) +
-    scale_y_continuous(limits = c(0.9, 1.45))
+    scale_y_continuous(labels = function(y){y + 1}, limits = c(-0.1, 0.43))
     #facetted_pos_scales(
     #  y = list(
     #    size_power == "Size" ~ scale_y_continuous(limits = c(0, 0.2))
