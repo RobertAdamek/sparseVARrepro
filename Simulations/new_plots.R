@@ -57,7 +57,8 @@ for (dgp in dgps) {
     scale_fill_manual(values = method_colors)+
     facet_grid(vars(size_power), vars(N), scales = "free_y") +
     theme(strip.text.y = element_text(size = y_facet_size)) +
-    theme(legend.position = "bottom") +
+    theme(legend.position = "bottom",
+          legend.title = element_blank()) +
     guides(fill = guide_legend(nrow = 1, byrow = TRUE)) +
     geom_hline(data = data.frame(size = level, size_power = factor("Size", levels = unique(df$size_power))),
       aes(yintercept = size)) +
